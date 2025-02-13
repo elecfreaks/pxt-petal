@@ -81,10 +81,12 @@ namespace petal {
     //% color=#EA5532 weight=85
     //% parts="headphone"
     //% useEnumVal=1
-    export function buzzerWrite(Rjpin: AnalogRJPin,frequency: number): void {
-        let pin = RJpin_to_analog(Rjpin)
-        pins.analogSetPeriod(pin, 100)
-        pins.analogWritePin(pin, frequency)
+    export function buzzerWrite(Rjpin: AnalogRJPin, frequency: number): void {
+        let pin = RJpin_to_analog(Rjpin);
+        const periodUs = 1000000 / frequency;
+        pins.analogSetPeriod(pin, Math.idiv(periodUs, 2));
+        const dutyCycle = 512;
+        pins.analogWritePin(pin, dutyCycle);
     }
 
     //% blockId="trimpot" block="Trimpot sensor %Rjpin analog value"
