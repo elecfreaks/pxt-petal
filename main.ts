@@ -87,6 +87,7 @@ namespace petal {
         pins.analogSetPeriod(pin, Math.idiv(periodUs, 2));
         const dutyCycle = 512;
         pins.analogWritePin(pin, dutyCycle);
+        pins.analogWritePin(pin, dutyCycle);
     }
 
     //% blockId="trimpot" block="Trimpot sensor %Rjpin analog value"
