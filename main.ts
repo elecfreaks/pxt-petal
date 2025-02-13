@@ -52,12 +52,44 @@ namespace petal {
         return pin
     }
 
-    //% blockId=button block="Button %Rjpin is pressed"
-    //% color=#EA5532
-    export function button_state_read(Rjpin: DigitalRJPin): boolean {
+    //% blockId=button block="Button sensor %Rjpin is pressed"
+    //% color=#EA5532 weight=100
+    export function buttonRead(Rjpin: DigitalRJPin): boolean {
         let pin = RJpin_to_digital(Rjpin)
         pins.setPull(pin, PinPullMode.PullUp)
         return pins.digitalReadPin(pin) == 1
     }
 
+    //% blockId=hall block="hall sensor %Rjpin is attracted"
+    //% color=#EA5532 weight=95
+    export function hallRead(Rjpin: DigitalRJPin): boolean {
+        let pin = RJpin_to_digital(Rjpin)
+        pins.setPull(pin, PinPullMode.PullUp)
+        return pins.digitalReadPin(pin) == 1
+    }
+
+    //% blockId=PIR block="PIR sensor %Rjpin detects motion"
+    //% color=#EA5532 weight=90
+    export function PIRRead(Rjpin: DigitalRJPin): boolean {
+        let pin = RJpin_to_digital(Rjpin)
+        pins.setPull(pin, PinPullMode.PullUp)
+        return pins.digitalReadPin(pin) == 1
+    }
+
+    //% blockId=PIR block="buzzer sensor %Rjpin play ring tone %frequency (Hz)"
+    //% help=music/ring-tone
+    //% color=#EA5532 weight=85
+    //% parts="headphone"
+    //% useEnumVal=1
+    export function buzzerWrite(Rjpin: AnalogRJPin,frequency: number): void {
+        let pin = RJpin_to_analog(Rjpin)
+        pins.analogWritePin(pin, frequency)
+    }
+
+    //% blockId="trimpot" block="Trimpot sensor %Rjpin analog value"
+    //% color=#E2C438 weight=40
+    export function trimpot(Rjpin: AnalogRJPin): number {
+        let pin = RJpin_to_analog(Rjpin)
+        return pins.analogReadPin(pin)
+    }
 }
