@@ -76,7 +76,7 @@ namespace petal {
         return pins.digitalReadPin(pin) == 1
     }
 
-    //% blockId=PIR block="buzzer sensor %Rjpin play ring tone %frequency (Hz)"
+    //% blockId=buzzer block="buzzer sensor %Rjpin play ring tone %frequency (Hz)"
     //% help=music/ring-tone
     //% color=#EA5532 weight=85
     //% parts="headphone"
