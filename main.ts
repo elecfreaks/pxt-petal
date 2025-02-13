@@ -83,11 +83,13 @@ namespace petal {
     //% useEnumVal=1
     export function buzzerWrite(Rjpin: AnalogRJPin, frequency: number): void {
         let pin = RJpin_to_analog(Rjpin);
-        const periodUs = 1000000 / frequency;
+        let periodUs = 1000000 / frequency;
         pins.analogSetPeriod(pin, Math.idiv(periodUs, 2));
-        const dutyCycle = 512;
+        let dutyCycle = 512;
         pins.analogWritePin(pin, dutyCycle);
-        basic.pause(10);
+        periodUs = 1000000 / frequency;
+        pins.analogSetPeriod(pin, Math.idiv(periodUs, 2));
+        dutyCycle = 512;
         pins.analogWritePin(pin, dutyCycle);
     }
 
