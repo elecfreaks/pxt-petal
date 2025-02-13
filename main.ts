@@ -87,6 +87,7 @@ namespace petal {
         pins.analogSetPeriod(pin, Math.idiv(periodUs, 2));
         const dutyCycle = 512;
         pins.analogWritePin(pin, dutyCycle);
+        Basic.pause(10);
         pins.analogWritePin(pin, dutyCycle);
     }
 
