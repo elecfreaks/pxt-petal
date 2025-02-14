@@ -34,6 +34,23 @@ namespace petal {
         Humidity
     }
 
+    export enum _6AxisState {
+        //% block="AX(g)"
+        AX,
+        //% block="AY(g)"
+        AY,
+        //% block="AZ(g)"
+        AZ,
+        //% block="GX(°/s)"
+        GX,
+        //% block="GY(°/s)"
+        GY,
+        //% block="GZ(°/s)"
+        GZ,
+        //% block="temperature(℃)"
+        _6Temperature
+    }
+
     export function portToAnalogPin(port: AnalogPort): any {
         let pin = AnalogPin.P1
         switch (port) {
@@ -301,6 +318,109 @@ namespace petal {
         }
 
         return -1;
+    }
+
+    //6 Axis Imu Sensor
+    let QMI8658A_I2C_ADDR = 0x6A;
+
+    const REG_SELFTEST = 0x0A;
+    const REG_I2C_CONFIG = 0x02;
+    const REG_ACCEL_CONFIG = 0x03;
+    const REG_GYRO_CONFIG = 0x04;
+    const REG_FILTER_CONFIG = 0x06;
+    const REG_POWER_CONFIG = 0x08;
+    const REG_STATUS = 0x2D;
+    const REG_ACCEL_START = 0x35;
+    const REG_GYRO_START = 0x3B;
+    const REG_TEMP_LOW = 0x33; // 温度寄存器低字节
+    const REG_TEMP_HIGH = 0x34; // 温度寄存器高字节
+
+    let _6AxisImuFlag = true;
+
+
+    function initSensor() {
+        writeRegister(REG_SELFTEST, 0xA2);
+        loops.pause(1750); // 自检等待时间
+    
+        writeRegister(REG_I2C_CONFIG, 0x60);
+        writeRegister(REG_ACCEL_CONFIG, 0x00); // ±2g, 100Hz ODR
+        writeRegister(REG_GYRO_CONFIG, 0x54);  // ±250°/s, 100Hz ODR
+        writeRegister(REG_FILTER_CONFIG, 0x01); 
+        writeRegister(REG_POWER_CONFIG, 0x03);
+    }
+    
+    function dataAvailable(): boolean {
+        let status = readRegister(REG_STATUS);
+        return (status & 0x01) === 1;
+    }
+    
+    function readData(): { ax: number, ay: number, az: number, gx: number, gy: number, gz: number, temperature: number } {
+        let rawData = pins.createBuffer(12);  // 存储从传感器读取的12个字节的数据（加速度计和陀螺仪）
+        let tempData = pins.createBuffer(2);  // 存储从传感器读取的2个字节的数据（温度）
+    
+        // 读取加速度计和陀螺仪数据
+        pins.i2cWriteNumber(QMI8658A_I2C_ADDR, REG_ACCEL_START, NumberFormat.UInt8LE, true); // 发送寄存器地址，并重启
+        rawData = pins.i2cReadBuffer(QMI8658A_I2C_ADDR, 12, false);
+    
+        let ax = (rawData.getNumber(NumberFormat.Int16LE, 0));
+        let ay = (rawData.getNumber(NumberFormat.Int16LE, 2));
+        let az = (rawData.getNumber(NumberFormat.Int16LE, 4));
+        let gx = (rawData.getNumber(NumberFormat.Int16LE, 6));
+        let gy = (rawData.getNumber(NumberFormat.Int16LE, 8));
+        let gz = (rawData.getNumber(NumberFormat.Int16LE, 10));
+    
+        // 读取温度数据
+        pins.i2cWriteNumber(QMI8658A_I2C_ADDR, REG_TEMP_LOW, NumberFormat.UInt8LE, true); // 发送寄存器地址，并重启
+        tempData = pins.i2cReadBuffer(QMI8658A_I2C_ADDR, 2, false);
+    
+        let tempRaw = tempData.getNumber(NumberFormat.Int16LE, 0);
+        let temperature = tempRaw / 256.0;
+    
+        return { ax, ay, az, gx, gy, gz, temperature };
+    }
+    
+
+    //% blockId="_6AxisImu" block="six AxisImu sensor read %state value"
+    //% color=#00B1ED weight=15
+    export function _6AxisImuRead(state: _6AxisState): number {
+        if (!dataAvailable()) {
+            return -1; // 如果数据不可用，返回-1
+        }
+
+        if (_6AxisImuFlag == true) {
+            initSensor();
+            _6AxisImuFlag = false;
+        }
+    
+        let data = readData();
+    
+        switch (state) {
+            case _6AxisState.AX:
+                return data.ax / 16384.0; // 转换为g单位
+            case _6AxisState.AY:
+                return data.ay / 16384.0;
+            case _6AxisState.AZ:
+                return data.az / 16384.0;
+            case _6AxisState.GX:
+                return data.gx / 131.072; // 转换为°/s单位
+            case _6AxisState.GY:
+                return data.gy / 131.072;
+            case _6AxisState.GZ:
+                return data.gz / 131.072;
+            case _6AxisState._6Temperature:
+                return data.temperature;
+            default:
+                return -1;
+        }
+    }
+    
+    function writeRegister(reg: number, value: number) {
+        pins.i2cWriteNumber(QMI8658A_I2C_ADDR, reg << 8 | value, NumberFormat.UInt16BE);
+    }
+    
+    function readRegister(reg: number): number {
+        pins.i2cWriteNumber(QMI8658A_I2C_ADDR, reg, NumberFormat.UInt8LE, true);
+        return pins.i2cReadNumber(QMI8658A_I2C_ADDR, NumberFormat.UInt8LE, false);
     }
 
 }
