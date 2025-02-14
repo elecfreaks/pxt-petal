@@ -27,7 +27,7 @@ namespace petal {
         Off
     }
 
-    export enum TempAndRh{
+    export enum TempAndRh {
         //% block="Temperature(℃)"
         Temperature,
         //% block="Humidity(0~100)"
@@ -205,8 +205,8 @@ namespace petal {
 
     //todu Petal Temp and RH Sensor
     let aht20Address = 0x38;
-    let humidity = 0.0;
-    let temperature = 0.0;
+    let AHT20humidity = 0.0;
+    let AHT20temperature = 0.0;
 
     // 初始化AHT20
     function initAHT20() {
@@ -226,15 +226,15 @@ namespace petal {
         let data = pins.i2cReadBuffer(aht20Address, 6);
 
         if (data.length == 6) {
-            let raw_humidity = ((data.getNumber(NumberFormat.UInt8BE, 1) << 12) |
+            let raw_AHT20humidity = ((data.getNumber(NumberFormat.UInt8BE, 1) << 12) |
                 (data.getNumber(NumberFormat.UInt8BE, 2) << 4) |
                 (data.getNumber(NumberFormat.UInt8BE, 3) >> 4));
-            humidity = (raw_humidity * 100 / 1048576);
+            AHT20humidity = (raw_AHT20humidity * 100 / 1048576);
 
-            let raw_temperature = (((data[3] & 0xF) << 16) |
+            let raw_AHT20temperature = (((data[3] & 0xF) << 16) |
                 (data.getNumber(NumberFormat.UInt8BE, 4) << 8) |
                 data.getNumber(NumberFormat.UInt8BE, 5));
-            temperature = (raw_temperature * 200 / 1048576 - 50);
+            AHT20temperature = (raw_AHT20temperature * 200 / 1048576 - 50);
 
             return true;
         }
@@ -242,18 +242,18 @@ namespace petal {
     }
     //% blockId="petalTempRH" block="Temp and RH sensor %state value"
     //% color=#00B1ED weight=20
-    export function petalTempRHRead(state:TempAndRh): number {
+    export function petalTempRHRead(state: TempAndRh): number {
         initAHT20()
         let flagCnt = 3
         while (flagCnt > 0 && !readAHT20()) { flagCnt-- }
-        if (temperature <= -50)
+        if (AHT20temperature <= -50)
             return -1
 
         switch (state) {
             case TempAndRh.Temperature:
-                return Math.round(temperature * 10) / 10
+                return Math.round(AHT20temperature * 10) / 10
             case TempAndRh.Humidity:
-                return Math.round(humidity)
+                return Math.round(AHT20humidity)
         }
     }
 
@@ -269,8 +269,38 @@ namespace petal {
     //% blockId="dlight" block="Dlight sensor light value"
     //% color=#00B1ED weight=17
     export function dlightRead(): number {
-        let Address = 0x35
+        let Address = 35
         pins.i2cWriteNumber(Address, 0x10, NumberFormat.UInt8BE)
         return Math.idiv(pins.i2cReadNumber(Address, NumberFormat.UInt16BE) * 5, 6)
     }
+
+    // HBT senor
+    let GXT310_I2C_ADDRESS = 0x48; // 7位I2C地址
+    let HBTtemperature = 0.0;
+    //% blockId="hbt" block="Hbt sensor read temperature value"
+    //% color=#00B1ED weight=15
+    export function hbtRead():number {
+        let buff = pins.createBuffer(2);
+
+        pins.i2cWriteNumber(GXT310_I2C_ADDRESS, 0x00, NumberFormat.UInt8LE, false); // 发送寄存器地址
+
+        // 请求从GXT310读取2个字节的数据
+        buff = pins.i2cReadBuffer(GXT310_I2C_ADDRESS, 2, false);
+
+        if (buff.length == 2) {
+            let tem = (buff.getNumber(NumberFormat.Int16LE, 0)); // 读取两个字节作为一个整数
+
+            if (tem & 0x8000) { // 如果最高位是1，表示负数
+                tem = ~tem + 1; // 取补码
+                HBTtemperature = -(tem * 0.0078125);
+            } else {
+                HBTtemperature = tem * 0.0078125;
+            }
+
+            return Math.round(HBTtemperature * 10) / 10;
+        }
+
+        return -1;
+    }
+
 }
