@@ -30,7 +30,7 @@ namespace petal {
     export enum TempAndRh{
         //% block="Temperature(℃)"
         Temperature,
-        //% block="Humidity(0~100%)"
+        //% block="Humidity(0~100)"
         Humidity
     }
 
@@ -240,16 +240,18 @@ namespace petal {
         }
         return false;
     }
-    //% blockId="petalTempRH" block="Petal Temp and RH sensor %port %state value"
+    //% blockId="petalTempRH" block="Petal Temp and RH sensor %state value"
     //% color=#00B1ED weight=20
     export function petalTempRHRead(state:TempAndRh): number {
         initAHT20()
         let flagCnt = 3
         while (flagCnt > 0 && !readAHT20()) { flagCnt-- }
+        if (temperature <= -50)
+            return -1
 
         switch (state) {
             case TempAndRh.Temperature:
-                return Math.round(temperature)
+                return Math.round(temperature * 10) / 10
             case TempAndRh.Humidity:
                 return Math.round(humidity)
         }
