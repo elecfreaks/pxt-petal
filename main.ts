@@ -240,7 +240,7 @@ namespace petal {
         }
         return false;
     }
-    //% blockId="petalTempRH" block="Petal Temp and RH sensor %state value"
+    //% blockId="petalTempRH" block="Temp and RH sensor %state value"
     //% color=#00B1ED weight=20
     export function petalTempRHRead(state:TempAndRh): number {
         initAHT20()
@@ -264,5 +264,13 @@ namespace petal {
         let pin = portToDigitalPin(port)
         pins.setPull(pin, PinPullMode.PullUp)
         return pins.digitalReadPin(pin) == 1
+    }
+
+    //% blockId="dlight" block="Dlight sensor light value"
+    //% color=#00B1ED weight=17
+    export function dlightRead(): number {
+        let Address = 0x35
+        pins.i2cWriteNumber(Address, 0x10, NumberFormat.UInt8BE)
+        return Math.idiv(pins.i2cReadNumber(Address, NumberFormat.UInt16BE) * 5, 6)
     }
 }
