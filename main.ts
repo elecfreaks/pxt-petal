@@ -340,7 +340,7 @@ namespace petal {
 
     function initSensor() {
         writeRegister(REG_SELFTEST, 0xA2);
-        loops.pause(1750); // 自检等待时间
+        basic.pause(1750); // 自检等待时间
     
         writeRegister(REG_I2C_CONFIG, 0x60);
         writeRegister(REG_ACCEL_CONFIG, 0x00); // ±2g, 100Hz ODR
@@ -383,15 +383,15 @@ namespace petal {
     //% blockId="_6AxisImu" block="six AxisImu sensor read %state value"
     //% color=#00B1ED weight=15
     export function _6AxisImuRead(state: _6AxisState): number {
-        if (!dataAvailable()) {
-            return -1; // 如果数据不可用，返回-1
-        }
-
         if (_6AxisImuFlag == true) {
             initSensor();
             _6AxisImuFlag = false;
         }
-    
+
+        if (!dataAvailable()) {
+            return -1; // 如果数据不可用，返回-1
+        }
+        
         let data = readData();
     
         switch (state) {
