@@ -277,21 +277,21 @@ namespace petal {
     // HBT senor
     let GXT310_I2C_ADDRESS = 0x48; // 7位I2C地址
     let HBTtemperature = 0.0;
+
     //% blockId="hbt" block="Hbt sensor read temperature value"
     //% color=#00B1ED weight=15
-    export function hbtRead():number {
+    export function hbtRead(): number {
         let buff = pins.createBuffer(2);
 
-        pins.i2cWriteNumber(GXT310_I2C_ADDRESS, 0x00, NumberFormat.UInt8LE, false); // 发送寄存器地址
+        pins.i2cWriteNumber(GXT310_I2C_ADDRESS, 0x00, NumberFormat.UInt8LE, true);
 
-        // 请求从GXT310读取2个字节的数据
         buff = pins.i2cReadBuffer(GXT310_I2C_ADDRESS, 2, false);
 
         if (buff.length == 2) {
-            let tem = (buff.getNumber(NumberFormat.Int16LE, 0)); // 读取两个字节作为一个整数
+            let tem = ((buff[0] << 8) | buff[1]) & 0xFFFF;
 
-            if (tem & 0x8000) { // 如果最高位是1，表示负数
-                tem = ~tem + 1; // 取补码
+            if (tem & 0x8000) {
+                tem = ~tem + 1;
                 HBTtemperature = -(tem * 0.0078125);
             } else {
                 HBTtemperature = tem * 0.0078125;
