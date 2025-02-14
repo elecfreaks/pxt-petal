@@ -95,12 +95,6 @@ namespace petal {
         pins.analogSetPeriod(pin, Math.idiv(periodUs, 2));
         let dutyCycle = 512;
         pins.analogWritePin(pin, dutyCycle);
-
-
-        // periodUs = 1000000 / frequency;
-        // pins.analogSetPeriod(pin, Math.idiv(periodUs, 2));
-        // dutyCycle = 512;
-        // pins.analogWritePin(pin, dutyCycle);
     }
 
     //% blockId="trimpot" block="Trimpot sensor %port analog value"
@@ -139,7 +133,7 @@ namespace petal {
     }
 
     //% blockId="redled" block="Red led sensor %port %state"
-    //% color=#E2C438 weight=40
+    //% color=#EA5532 weight=80
     export function redLedWritr(port: DigitalPort,state:SwitchState): void {
         let pin = portToDigitalPin(port)
         switch (state) {
@@ -150,5 +144,65 @@ namespace petal {
                 pins.digitalWritePin(pin, 0)
                 break;
         }
+    }
+
+    //% blockId="uvLevel" block="UV sensor %Rjpin level(0~15)"
+    //% color=#E2C438 weight=30
+    export function uvLevelRead(port: AnalogPort): number {
+        let pin = portToAnalogPin(port)
+        let UVlevel = pins.analogReadPin(pin);
+        if (UVlevel > 625) {
+            UVlevel = 625
+        }
+        UVlevel = pins.map(
+            UVlevel,
+            0,
+            625,
+            0,
+            15
+        );
+        return Math.round(UVlevel)
+    }
+
+    //% blockId=vibrationDetection block="Vibration detection sensor %port vibration detected"
+    //% color=#EA5532 weight=75
+    export function vibrationDetectionRead(port: DigitalPort): boolean {
+        let pin = portToDigitalPin(port)
+        pins.setPull(pin, PinPullMode.PullUp)
+        return pins.digitalReadPin(pin) == 1
+    }
+
+    //todo RGB
+
+    //% blockId=tilt block="Tilt sensor %port Tilt detected"
+    //% color=#EA5532 weight=70
+    export function tiltRead(port: DigitalPort): boolean {
+        let pin = portToDigitalPin(port)
+        pins.setPull(pin, PinPullMode.PullUp)
+        return pins.digitalReadPin(pin) == 1
+    }
+
+    //% blockId="vibratorMotor" block="Vibrator motor sensor %port %state"
+    //% color=#EA5532 weight=65
+    export function vibratorMotorWritr(port: DigitalPort,state:SwitchState): void {
+        let pin = portToDigitalPin(port)
+        switch (state) {
+            case SwitchState.Open:
+                pins.digitalWritePin(pin, 1)
+                break;
+            case SwitchState.Off:
+                pins.digitalWritePin(pin, 0)
+                break;
+        }
+    }
+
+    //todu Petal Temp and RH Sensor
+
+    //% blockId=optoelectronic block="Optoelectronic sensor %port Obstruction detected"
+    //% color=#EA5532 weight=60
+    export function optoelectronicRead(port: DigitalPort): boolean {
+        let pin = portToDigitalPin(port)
+        pins.setPull(pin, PinPullMode.PullUp)
+        return pins.digitalReadPin(pin) == 1
     }
 }
