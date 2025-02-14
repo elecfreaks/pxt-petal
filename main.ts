@@ -27,6 +27,13 @@ namespace petal {
         Off
     }
 
+    export enum TempAndRh{
+        //% block="Temperature(℃)"
+        Temperature,
+        //% block="Humidity(0~100%)"
+        Humidity
+    }
+
     export function portToAnalogPin(port: AnalogPort): any {
         let pin = AnalogPin.P1
         switch (port) {
@@ -134,7 +141,7 @@ namespace petal {
 
     //% blockId="redled" block="Red led sensor %port %state"
     //% color=#EA5532 weight=80
-    export function redLedWritr(port: DigitalPort,state:SwitchState): void {
+    export function redLedWritr(port: DigitalPort, state: SwitchState): void {
         let pin = portToDigitalPin(port)
         switch (state) {
             case SwitchState.Open:
@@ -184,7 +191,7 @@ namespace petal {
 
     //% blockId="vibratorMotor" block="Vibrator motor sensor %port %state"
     //% color=#EA5532 weight=65
-    export function vibratorMotorWritr(port: DigitalPort,state:SwitchState): void {
+    export function vibratorMotorWritr(port: DigitalPort, state: SwitchState): void {
         let pin = portToDigitalPin(port)
         switch (state) {
             case SwitchState.Open:
@@ -197,6 +204,57 @@ namespace petal {
     }
 
     //todu Petal Temp and RH Sensor
+    let aht20Address = 0x38;
+    let humidity = 0.0;
+    let temperature = 0.0;
+
+    // 初始化AHT20
+    function initAHT20() {
+        pins.i2cWriteNumber(aht20Address, 0xE1, NumberFormat.UInt8BE);
+        pins.i2cWriteNumber(aht20Address, 0x08, NumberFormat.UInt8BE);
+        pins.i2cWriteNumber(aht20Address, 0x00, NumberFormat.UInt8BE);
+        basic.pause(10); // 等待初始化完成
+    }
+
+    // 读取AHT20数据
+    function readAHT20() {
+        pins.i2cWriteNumber(aht20Address, 0xAC, NumberFormat.UInt8BE);
+        pins.i2cWriteNumber(aht20Address, 0x33, NumberFormat.UInt8BE);
+        pins.i2cWriteNumber(aht20Address, 0x00, NumberFormat.UInt8BE);
+        basic.pause(80); // 等待测量完成
+
+        let data = pins.i2cReadBuffer(aht20Address, 6);
+
+        if (data.length == 6) {
+            let raw_humidity = ((data.getNumber(NumberFormat.UInt8BE, 1) << 12) |
+                (data.getNumber(NumberFormat.UInt8BE, 2) << 4) |
+                (data.getNumber(NumberFormat.UInt8BE, 3) >> 4));
+            humidity = (raw_humidity * 100 / 1048576);
+
+            let raw_temperature = (((data[3] & 0xF) << 16) |
+                (data.getNumber(NumberFormat.UInt8BE, 4) << 8) |
+                data.getNumber(NumberFormat.UInt8BE, 5));
+            temperature = (raw_temperature * 200 / 1048576 - 50);
+
+            return true;
+        }
+        return false;
+    }
+    //% blockId="petalTempRH" block="Petal Temp and RH sensor %port %state value"
+    //% color=#00B1ED weight=20
+    export function petalTempRHRead(state:TempAndRh): number {
+        initAHT20()
+        let flagCnt = 3
+        while (flagCnt > 0 && !readAHT20()) { flagCnt-- }
+
+        switch (state) {
+            case TempAndRh.Temperature:
+                return Math.round(temperature)
+            case TempAndRh.Humidity:
+                return Math.round(humidity)
+        }
+    }
+
 
     //% blockId=optoelectronic block="Optoelectronic sensor %port Obstruction detected"
     //% color=#EA5532 weight=60
