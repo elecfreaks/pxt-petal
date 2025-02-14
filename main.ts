@@ -51,6 +51,15 @@ namespace petal {
         _6Temperature
     }
 
+    export enum AccelerometerState {
+        //% block="X(m/s^2)"
+        X,
+        //% block="Y(m/s^2)"
+        Y,
+        //% block="Z(m/s^2)"
+        Z
+    }
+
     export function portToAnalogPin(port: AnalogPort): any {
         let pin = AnalogPin.P1
         switch (port) {
@@ -320,6 +329,97 @@ namespace petal {
         return -1;
     }
 
+    // DS18B20 Sensor
+    const DS18B20_CONVERT_T = 0x44; // 开始温度转换
+    const DS18B20_READ_SCRATCHPAD = 0xBE; // 读取暂存器数据
+
+    /**
+     * 发送复位脉冲并等待从机响应
+     */
+    function oneWireReset(port: any): void {
+        pins.digitalWritePin(port, 0); // 拉低总线以发送复位脉冲
+        control.waitMicros(480); // 等待至少480微秒
+        pins.digitalWritePin(port, 1); // 释放总线
+        control.waitMicros(70); // 等待从机响应
+    }
+
+    /**
+     * 向DS18B20写入一个字节
+     */
+    function oneWireWriteByte(port: any, data: number): void {
+        for (let i = 0; i < 8; i++) {
+            pins.digitalWritePin(port, 0); // 开始时拉低总线
+            if ((data & (1 << i)) != 0) {
+                control.waitMicros(5); // 写1：拉低后等待较短时间
+                pins.digitalWritePin(port, 1);
+                control.waitMicros(60); // 总共保持高电平至少60微秒
+            } else {
+                control.waitMicros(60); // 写0：保持低电平至少60微秒
+                pins.digitalWritePin(port, 1);
+                control.waitMicros(5); // 然后恢复高电平
+            }
+        }
+    }
+
+    /**
+     * 从DS18B20读取一个字节
+     */
+    function oneWireReadByte(port: any): number {
+        let value = 0;
+        for (let i = 0; i < 8; i++) {
+            pins.digitalWritePin(port, 0); // 开始时拉低总线
+            control.waitMicros(2); // 短暂等待
+            pins.digitalWritePin(port, 1); // 释放总线
+            control.waitMicros(5); // 等待从机回应
+            if (pins.digitalReadPin(port) == 1) {
+                value |= (1 << i); // 如果读到的是高电平，则设置对应位
+            }
+            control.waitMicros(55); // 确保位时隙完成
+        }
+        return value;
+    }
+
+    //% blockId=ds18b20 block="ds18b20 sensor %port read temperature(℃) value"
+    //% color=#EA5532 weight=55
+    export function ds18b20Read(port: any): number {
+        let pin = portToDigitalPin(port)
+        // 初始化OneWire总线
+        oneWireReset(pin);
+
+        // 发送匹配ROM命令 (0x55)，然后是设备的64位序列号。
+        // 在多设备网络中，这一步很重要，但在单设备情况下可以省略。
+        // 这里我们假设只有一个DS18B20连接到总线上
+        oneWireWriteByte(pin, 0xCC); // 跳过ROM命令
+        oneWireWriteByte(pin, DS18B20_CONVERT_T); // 开始温度转换
+
+        // 等待转换完成，通常最多需要750毫秒
+        basic.pause(750);
+
+        // 重新初始化OneWire总线
+        oneWireReset(pin);
+
+        // 发送跳过ROM命令和读取暂存器命令
+        oneWireWriteByte(pin, 0xCC); // 跳过ROM命令
+        oneWireWriteByte(pin, DS18B20_READ_SCRATCHPAD); // 读取暂存器命令
+
+        // 读取两个字节的数据，第一个字节是温度的低位，第二个字节是高位
+        let low = oneWireReadByte(pin);
+        let high = oneWireReadByte(pin);
+
+        // 将高低字节组合成16位整数
+        let temp = ((high << 8) | low);
+
+        // 将二进制数据转换为有符号整数
+        if (temp > 0x7FFF) {
+            temp = temp - 0xFFFF;
+        }
+
+        // 最终计算出的实际温度值，单位为摄氏度
+        let temperature = temp / 16.0;
+
+        return temperature;
+    }
+
     //6 Axis Imu Sensor
     let QMI8658A_I2C_ADDR = 0x6A;
 
@@ -341,47 +441,47 @@ namespace petal {
     function initSensor() {
         writeRegister(REG_SELFTEST, 0xA2);
         basic.pause(1750); // 自检等待时间
-    
+
         writeRegister(REG_I2C_CONFIG, 0x60);
         writeRegister(REG_ACCEL_CONFIG, 0x00); // ±2g, 100Hz ODR
         writeRegister(REG_GYRO_CONFIG, 0x54);  // ±250°/s, 100Hz ODR
-        writeRegister(REG_FILTER_CONFIG, 0x01); 
+        writeRegister(REG_FILTER_CONFIG, 0x01);
         writeRegister(REG_POWER_CONFIG, 0x03);
     }
-    
+
     function dataAvailable(): boolean {
         let status = readRegister(REG_STATUS);
         return (status & 0x01) === 1;
     }
-    
+
     function readData(): { ax: number, ay: number, az: number, gx: number, gy: number, gz: number, temperature: number } {
         let rawData = pins.createBuffer(12);  // 存储从传感器读取的12个字节的数据（加速度计和陀螺仪）
         let tempData = pins.createBuffer(2);  // 存储从传感器读取的2个字节的数据（温度）
-    
+
         // 读取加速度计和陀螺仪数据
         pins.i2cWriteNumber(QMI8658A_I2C_ADDR, REG_ACCEL_START, NumberFormat.UInt8LE, true); // 发送寄存器地址，并重启
         rawData = pins.i2cReadBuffer(QMI8658A_I2C_ADDR, 12, false);
-    
+
         let ax = (rawData.getNumber(NumberFormat.Int16LE, 0));
         let ay = (rawData.getNumber(NumberFormat.Int16LE, 2));
         let az = (rawData.getNumber(NumberFormat.Int16LE, 4));
         let gx = (rawData.getNumber(NumberFormat.Int16LE, 6));
         let gy = (rawData.getNumber(NumberFormat.Int16LE, 8));
         let gz = (rawData.getNumber(NumberFormat.Int16LE, 10));
-    
+
         // 读取温度数据
         pins.i2cWriteNumber(QMI8658A_I2C_ADDR, REG_TEMP_LOW, NumberFormat.UInt8LE, true); // 发送寄存器地址，并重启
         tempData = pins.i2cReadBuffer(QMI8658A_I2C_ADDR, 2, false);
-    
+
         let tempRaw = tempData.getNumber(NumberFormat.Int16LE, 0);
         let temperature = tempRaw / 256.0;
-    
+
         return { ax, ay, az, gx, gy, gz, temperature };
     }
-    
+
 
     //% blockId="_6AxisImu" block="six AxisImu sensor read %state value"
-    //% color=#00B1ED weight=15
+    //% color=#00B1ED weight=10
     export function _6AxisImuRead(state: _6AxisState): number {
         if (_6AxisImuFlag == true) {
             initSensor();
@@ -389,12 +489,12 @@ namespace petal {
         }
 
         let _6AxisImucnt = 5;
-        while(_6AxisImucnt > 0 && !dataAvailable()) {
+        while (_6AxisImucnt > 0 && !dataAvailable()) {
             _6AxisImucnt--;
         }
-        
+
         let data = readData();
-    
+
         //结果保留两位小数
         switch (state) {
             case _6AxisState.AX:
@@ -415,14 +515,21 @@ namespace petal {
                 return 0;
         }
     }
-    
+
     function writeRegister(reg: number, value: number) {
         pins.i2cWriteNumber(QMI8658A_I2C_ADDR, reg << 8 | value, NumberFormat.UInt16BE);
     }
-    
+
     function readRegister(reg: number): number {
         pins.i2cWriteNumber(QMI8658A_I2C_ADDR, reg, NumberFormat.UInt8LE, true);
         return pins.i2cReadNumber(QMI8658A_I2C_ADDR, NumberFormat.UInt8LE, false);
     }
 
+    //Accelerometer Sensor
+
+    //% blockId="Accel" block="Accelerometer sensor read %state value"
+    //% color=#00B1ED weight=5
+    export function AccelRead(state: AccelerometerState): number {
+
+    }
 }
