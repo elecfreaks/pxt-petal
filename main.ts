@@ -388,29 +388,31 @@ namespace petal {
             _6AxisImuFlag = false;
         }
 
-        if (!dataAvailable()) {
-            return -1; // 如果数据不可用，返回-1
+        let _6AxisImucnt = 5;
+        while(_6AxisImucnt > 0 && !dataAvailable()) {
+            _6AxisImucnt--;
         }
         
         let data = readData();
     
+        //结果保留两位小数
         switch (state) {
             case _6AxisState.AX:
-                return data.ax / 16384.0; // 转换为g单位
+                return Math.round(data.ax * 0.000061035);
             case _6AxisState.AY:
-                return data.ay / 16384.0;
+                return Math.round(data.ay * 0.000061035);
             case _6AxisState.AZ:
-                return data.az / 16384.0;
+                return Math.round(data.az * 0.000061035);
             case _6AxisState.GX:
-                return data.gx / 131.072; // 转换为°/s单位
+                return Math.round(data.gx * 0.00763);
             case _6AxisState.GY:
-                return data.gy / 131.072;
+                return Math.round(data.gy * 0.00763);
             case _6AxisState.GZ:
-                return data.gz / 131.072;
+                return Math.round(data.gz * 0.00763);
             case _6AxisState._6Temperature:
-                return data.temperature;
+                return Math.round(data.temperature * 10) / 10;
             default:
-                return -1;
+                return 0;
         }
     }
     
