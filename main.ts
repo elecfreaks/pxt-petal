@@ -398,19 +398,19 @@ namespace petal {
         //结果保留两位小数
         switch (state) {
             case _6AxisState.AX:
-                return Math.round(data.ax * 0.000061035);
+                return Math.round(data.ax * 0.0061035) / 100;
             case _6AxisState.AY:
-                return Math.round(data.ay * 0.000061035);
+                return Math.round(data.ay * 0.0061035) / 100;
             case _6AxisState.AZ:
-                return Math.round(data.az * 0.000061035);
+                return Math.round(data.az * 0.0061035) / 100;
             case _6AxisState.GX:
-                return Math.round(data.gx * 0.00763);
+                return Math.round(data.gx * 0.0076294) / 100;
             case _6AxisState.GY:
-                return Math.round(data.gy * 0.00763);
+                return Math.round(data.gy * 0.0076294) / 100;
             case _6AxisState.GZ:
-                return Math.round(data.gz * 0.00763);
+                return Math.round(data.gz * 0.0076294) / 100;
             case _6AxisState._6Temperature:
-                return Math.round(data.temperature * 10) / 10;
+                return Math.round(data.temperature);
             default:
                 return 0;
         }
