@@ -346,7 +346,7 @@ namespace petal {
     let temperature = 0
     let ack = 0
     let lastTemp = 0
-    
+
     function init_18b20(mpin: DigitalPin) {
         pins.digitalWritePin(mpin, 0)
         control.waitMicros(600)
@@ -522,9 +522,80 @@ namespace petal {
 
     //Accelerometer Sensor
 
+    // LIS3DH I2C地址
+    const LIS3DH_I2C_ADDRESS = 0x19;
+    let accelFlag = true;
+
+
+    /**
+     * 初始化LIS3DH加速度计。
+     */
+    function initializeLIS3DH(): void {
+        // 设置正常模式
+        pins.i2cWriteNumber(LIS3DH_I2C_ADDRESS, 0x20, NumberFormat.UInt8BE);
+        basic.pause(10);
+
+        let whoAmI = pins.i2cReadNumber(LIS3DH_I2C_ADDRESS, NumberFormat.UInt8BE, false);
+        if (whoAmI != 0x33) { // LIS3DH的WHO_AM_I寄存器默认值为0x33
+            serial.writeString("Ooops, no LIS3DH detected at ");
+            serial.writeNumber(LIS3DH_I2C_ADDRESS);
+            serial.writeString("\nCheck your wiring!\n");
+
+            i2cScan();
+            while (true) {
+                // 无限循环，检测失败时停止执行
+            }
+        } else {
+            serial.writeString("LIS3DH found at ");
+            serial.writeNumber(LIS3DH_I2C_ADDRESS);
+            serial.writeString("!\n");
+
+            // 设置量程为±4G
+            setRange(LIS3DH_I2C_ADDRESS, 0x08); // 对应LIS3DH_RANGE_4_G
+        }
+    }
+
+    function setRange(address: number, range: number): void {
+        pins.i2cWriteNumber(address, 0x20 | 0x10, NumberFormat.UInt8BE); // CTRL_REG1_A
+        basic.pause(10);
+        pins.i2cWriteNumber(address, range, NumberFormat.UInt8BE); // CTRL_REG4_A
+        basic.pause(10);
+    }
+
     //% blockId="Accel" block="Accelerometer sensor read %state value"
     //% color=#00B1ED weight=5
     export function AccelRead(state: AccelerometerState): number {
-        return 0
+        if (accelFlag == true) {
+            initializeLIS3DH();
+            accelFlag = false;
+        }
+        let axisReg;
+        switch (state) {
+            case AccelerometerState.X:
+                axisReg = 0x28; // OUT_X_L
+                break;
+            case AccelerometerState.Y:
+                axisReg = 0x2A; // OUT_Y_L
+                break;
+            case AccelerometerState.Z:
+                axisReg = 0x2C; // OUT_Z_L
+                break;
+            default:
+                return 0; // 如果状态无效，返回0
+        }
+
+        // 读取低字节和高字节
+        let low = pins.i2cReadNumber(LIS3DH_I2C_ADDRESS, NumberFormat.UInt8BE, false, axisReg);
+        let high = pins.i2cReadNumber(LIS3DH_I2C_ADDRESS, NumberFormat.UInt8BE, true, axisReg + 1);
+
+        // 组合高低字节得到16位整数
+        let value = ((high << 8) | low);
+
+        // 将16位值转换为有符号整数
+        if (value & 0x8000) value = -(0x10000 - value);
+
+        // 转换为m/s^2，假设当前量程为±4G
+        // 每个LSB对应4mg (毫g)
+        return value * 0.004;
     }
 }
