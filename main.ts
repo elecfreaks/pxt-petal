@@ -34,6 +34,14 @@ namespace petal {
         Humidity
     }
 
+    export enum DS18B20ValType {
+        //% block="temperature(℃)" enumval=0
+        DS18B20_temperature_C,
+
+        //% block="temperature(℉)" enumval=1
+        DS18B20_temperature_F
+    }
+
     export enum _6AxisState {
         //% block="AX(g)"
         AX,
@@ -330,103 +338,83 @@ namespace petal {
     }
 
     // DS18B20 Sensor
-    const DS18B20_CONVERT_T = 0x44; // 开始温度转换
-    const DS18B20_READ_SCRATCHPAD = 0xBE; // 读取暂存器数据
-    const SKIP_ROM = 0xCC; // 跳过ROM命令
-
-    /**
-     * 发送复位脉冲并等待从机响应
-     */
-    function oneWireReset(port: DigitalPin): boolean {
-        pins.digitalWritePin(port, 0); // 拉低总线以发送复位脉冲
-        control.waitMicros(480); // 等待至少480微秒
-        pins.digitalWritePin(port, 1); // 释放总线
-        control.waitMicros(70); // 等待从机响应
-        let presence = pins.digitalReadPin(port) == 0;
-        if (presence) {
-            control.waitMicros(410); // 如果检测到设备，等待其完成响应
-        }
-        return presence;
+    let sc_byte = 0
+    let dat = 0
+    let low = 0
+    let high = 0
+    let temp = 0
+    let temperature = 0
+    let ack = 0
+    let lastTemp = 0
+    
+    function init_18b20(mpin: DigitalPin) {
+        pins.digitalWritePin(mpin, 0)
+        control.waitMicros(600)
+        pins.digitalWritePin(mpin, 1)
+        control.waitMicros(30)
+        ack = pins.digitalReadPin(mpin)
+        control.waitMicros(600)
+        return ack
     }
-
-    /**
-     * 向DS18B20写入一个字节
-     */
-    function oneWireWriteByte(port: DigitalPin, data: number): void {
-        for (let i = 0; i < 8; i++) {
-            pins.digitalWritePin(port, 0); // 开始时拉低总线
-            control.waitMicros(1); // 短暂等待
-            if ((data & (1 << i)) != 0) {
-                control.waitMicros(60 - 1); // 写1：保持高电平至少60微秒（包括恢复时间）
+    function write_18b20(mpin: DigitalPin, data: number) {
+        sc_byte = 0x01
+        for (let index = 0; index < 8; index++) {
+            pins.digitalWritePin(mpin, 0)
+            if (data & sc_byte) {
+                pins.digitalWritePin(mpin, 1)
+                control.waitMicros(60)
             } else {
-                control.waitMicros(60); // 写0：保持低电平至少60微秒
+                pins.digitalWritePin(mpin, 0)
+                control.waitMicros(60)
             }
-            pins.digitalWritePin(port, 1); // 释放总线
-            control.waitMicros(1); // 确保有足够的恢复时间
+            pins.digitalWritePin(mpin, 1)
+            data = data >> 1
         }
     }
-
-    /**
-     * 从DS18B20读取一个字节
-     */
-    function oneWireReadByte(port: DigitalPin): number {
-        let value = 0;
-        for (let i = 0; i < 8; i++) {
-            pins.digitalWritePin(port, 0); // 开始时拉低总线
-            control.waitMicros(1); // 短暂等待
-            pins.digitalWritePin(port, 1); // 释放总线
-            control.waitMicros(5); // 等待从机回应
-            if (pins.digitalReadPin(port) == 1) {
-                value |= (1 << i); // 如果读到的是高电平，则设置对应位
+    function read_18b20(mpin: DigitalPin) {
+        dat = 0x00
+        sc_byte = 0x01
+        for (let index = 0; index < 8; index++) {
+            pins.digitalWritePin(mpin, 0)
+            pins.digitalWritePin(mpin, 1)
+            if (pins.digitalReadPin(mpin)) {
+                dat = dat + sc_byte
             }
-            control.waitMicros(55); // 确保位时隙完成
+            sc_byte = sc_byte << 1
+            control.waitMicros(60)
         }
-        return value;
+        return dat
     }
-
-    //% blockId=ds18b20 block="ds18b20 sensor %port read temperature(℃) value"
+    //% blockId=ds18b20 block="ds18b20 sensor %port read %state value"
     //% color=#EA5532 weight=55
-    export function ds18b20Read(port: DigitalPort): number {
+    export function Ds18b20Temp(port: DigitalPort, state: DS18B20ValType): number {
         let pin = portToDigitalPin(port);
-        // 初始化OneWire总线
-        if (!oneWireReset(pin)) {
-            return -1; // 如果没有检测到设备，返回-1
+        init_18b20(pin)
+        write_18b20(pin, 0xCC)
+        write_18b20(pin, 0x44)
+        basic.pause(10)
+        init_18b20(pin)
+        write_18b20(pin, 0xCC)
+        write_18b20(pin, 0xBE)
+        low = read_18b20(pin)
+        high = read_18b20(pin)
+        temperature = high << 8 | low
+        temperature = temperature / 16
+        if (temperature > 130) {
+            temperature = lastTemp
+        }
+        lastTemp = temperature
+        switch (state) {
+            case DS18B20ValType.DS18B20_temperature_C:
+                return temperature
+            case DS18B20ValType.DS18B20_temperature_F:
+                temperature = (temperature * 1.8) + 32
+                return temperature
+            default:
+                return 0
         }
 
-        // 跳过ROM命令并开始温度转换
-        oneWireWriteByte(pin, SKIP_ROM); // 0xCC
-        oneWireWriteByte(pin, DS18B20_CONVERT_T); // 0x44
-
-        // 等待转换完成，通常最多需要750毫秒
-        basic.pause(750);
-
-        // 重新初始化OneWire总线
-        if (!oneWireReset(pin)) {
-            return -1; // 如果没有检测到设备，返回-1
-        }
-
-        // 跳过ROM命令并读取暂存器
-        oneWireWriteByte(pin, SKIP_ROM); // 0xCC
-        oneWireWriteByte(pin, DS18B20_READ_SCRATCHPAD); // 0xBE
-
-        // 读取两个字节的数据，第一个字节是温度的低位，第二个字节是高位
-        let low = oneWireReadByte(pin);
-        let high = oneWireReadByte(pin);
-
-        // 将高低字节组合成16位整数
-        let temp = ((high << 8) | low);
-
-        // 处理负温度值
-        if (temp > 0x7FFF) {
-            temp = temp - 0xFFFF - 1;
-        }
-
-        // 最终计算出的实际温度值，单位为摄氏度
-        let temperature = temp / 16.0;
-
-        return temperature;
     }
-
     //6 Axis Imu Sensor
     let QMI8658A_I2C_ADDR = 0x6A;
 
