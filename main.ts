@@ -336,27 +336,28 @@ namespace petal {
     /**
      * 发送复位脉冲并等待从机响应
      */
-    function oneWireReset(port: any): void {
+    function oneWireReset(port: DigitalPin): boolean {
         pins.digitalWritePin(port, 0); // 拉低总线以发送复位脉冲
         control.waitMicros(480); // 等待至少480微秒
         pins.digitalWritePin(port, 1); // 释放总线
         control.waitMicros(70); // 等待从机响应
+        return pins.digitalReadPin(port) == 0; // 如果设备拉低了总线，则返回true
     }
 
     /**
      * 向DS18B20写入一个字节
      */
-    function oneWireWriteByte(port: any, data: number): void {
+    function oneWireWriteByte(port: DigitalPin, data: number): void {
         for (let i = 0; i < 8; i++) {
             pins.digitalWritePin(port, 0); // 开始时拉低总线
             if ((data & (1 << i)) != 0) {
-                control.waitMicros(5); // 写1：拉低后等待较短时间
+                control.waitMicros(6); // 写1：保持高电平至少60微秒（包括恢复时间）
                 pins.digitalWritePin(port, 1);
-                control.waitMicros(60); // 总共保持高电平至少60微秒
+                control.waitMicros(60 - 6);
             } else {
                 control.waitMicros(60); // 写0：保持低电平至少60微秒
                 pins.digitalWritePin(port, 1);
-                control.waitMicros(5); // 然后恢复高电平
+                control.waitMicros(6); // 确保有足够的恢复时间
             }
         }
     }
@@ -364,54 +365,55 @@ namespace petal {
     /**
      * 从DS18B20读取一个字节
      */
-    function oneWireReadByte(port: any): number {
+    function oneWireReadByte(port: DigitalPin): number {
         let value = 0;
         for (let i = 0; i < 8; i++) {
             pins.digitalWritePin(port, 0); // 开始时拉低总线
-            control.waitMicros(2); // 短暂等待
+            control.waitMicros(1); // 短暂等待
             pins.digitalWritePin(port, 1); // 释放总线
-            control.waitMicros(5); // 等待从机回应
+            control.waitMicros(14); // 等待从机回应
             if (pins.digitalReadPin(port) == 1) {
                 value |= (1 << i); // 如果读到的是高电平，则设置对应位
             }
-            control.waitMicros(55); // 确保位时隙完成
+            control.waitMicros(45); // 确保位时隙完成
         }
         return value;
     }
 
     //% blockId=ds18b20 block="ds18b20 sensor %port read temperature(℃) value"
     //% color=#EA5532 weight=55
-    export function ds18b20Read(port: any): number {
-        let pin = portToDigitalPin(port)
+    export function ds18b20Read(port: DigitalPin): number {
         // 初始化OneWire总线
-        oneWireReset(pin);
+        if (!oneWireReset(port)) {
+            return -1; // 如果没有检测到设备，返回-1
+        }
 
-        // 发送匹配ROM命令 (0x55)，然后是设备的64位序列号。
-        // 在多设备网络中，这一步很重要，但在单设备情况下可以省略。
-        // 这里我们假设只有一个DS18B20连接到总线上
-        oneWireWriteByte(pin, 0xCC); // 跳过ROM命令
-        oneWireWriteByte(pin, DS18B20_CONVERT_T); // 开始温度转换
+        // 跳过ROM命令并开始温度转换
+        oneWireWriteByte(port, SKIP_ROM); // 0xCC
+        oneWireWriteByte(port, DS18B20_CONVERT_T); // 0x44
 
         // 等待转换完成，通常最多需要750毫秒
         basic.pause(750);
 
         // 重新初始化OneWire总线
-        oneWireReset(pin);
+        if (!oneWireReset(port)) {
+            return -1; // 如果没有检测到设备，返回-1
+        }
 
-        // 发送跳过ROM命令和读取暂存器命令
-        oneWireWriteByte(pin, 0xCC); // 跳过ROM命令
-        oneWireWriteByte(pin, DS18B20_READ_SCRATCHPAD); // 读取暂存器命令
+        // 跳过ROM命令并读取暂存器
+        oneWireWriteByte(port, SKIP_ROM); // 0xCC
+        oneWireWriteByte(port, DS18B20_READ_SCRATCHPAD); // 0xBE
 
         // 读取两个字节的数据，第一个字节是温度的低位，第二个字节是高位
-        let low = oneWireReadByte(pin);
-        let high = oneWireReadByte(pin);
+        let low = oneWireReadByte(port);
+        let high = oneWireReadByte(port);
 
         // 将高低字节组合成16位整数
         let temp = ((high << 8) | low);
 
-        // 将二进制数据转换为有符号整数
+        // 处理负温度值
         if (temp > 0x7FFF) {
-            temp = temp - 0xFFFF;
+            temp = temp - 0xFFFF - 1;
         }
 
         // 最终计算出的实际温度值，单位为摄氏度
