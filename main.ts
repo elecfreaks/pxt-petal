@@ -332,6 +332,7 @@ namespace petal {
     // DS18B20 Sensor
     const DS18B20_CONVERT_T = 0x44; // 开始温度转换
     const DS18B20_READ_SCRATCHPAD = 0xBE; // 读取暂存器数据
+    const SKIP_ROM = 0xCC; // 跳过ROM命令
 
     /**
      * 发送复位脉冲并等待从机响应
@@ -341,7 +342,11 @@ namespace petal {
         control.waitMicros(480); // 等待至少480微秒
         pins.digitalWritePin(port, 1); // 释放总线
         control.waitMicros(70); // 等待从机响应
-        return pins.digitalReadPin(port) == 0; // 如果设备拉低了总线，则返回true
+        let presence = pins.digitalReadPin(port) == 0;
+        if (presence) {
+            control.waitMicros(410); // 如果检测到设备，等待其完成响应
+        }
+        return presence;
     }
 
     /**
@@ -350,15 +355,14 @@ namespace petal {
     function oneWireWriteByte(port: DigitalPin, data: number): void {
         for (let i = 0; i < 8; i++) {
             pins.digitalWritePin(port, 0); // 开始时拉低总线
+            control.waitMicros(1); // 短暂等待
             if ((data & (1 << i)) != 0) {
-                control.waitMicros(6); // 写1：保持高电平至少60微秒（包括恢复时间）
-                pins.digitalWritePin(port, 1);
-                control.waitMicros(60 - 6);
+                control.waitMicros(60 - 1); // 写1：保持高电平至少60微秒（包括恢复时间）
             } else {
                 control.waitMicros(60); // 写0：保持低电平至少60微秒
-                pins.digitalWritePin(port, 1);
-                control.waitMicros(6); // 确保有足够的恢复时间
             }
+            pins.digitalWritePin(port, 1); // 释放总线
+            control.waitMicros(1); // 确保有足够的恢复时间
         }
     }
 
@@ -371,42 +375,43 @@ namespace petal {
             pins.digitalWritePin(port, 0); // 开始时拉低总线
             control.waitMicros(1); // 短暂等待
             pins.digitalWritePin(port, 1); // 释放总线
-            control.waitMicros(14); // 等待从机回应
+            control.waitMicros(5); // 等待从机回应
             if (pins.digitalReadPin(port) == 1) {
                 value |= (1 << i); // 如果读到的是高电平，则设置对应位
             }
-            control.waitMicros(45); // 确保位时隙完成
+            control.waitMicros(55); // 确保位时隙完成
         }
         return value;
     }
 
     //% blockId=ds18b20 block="ds18b20 sensor %port read temperature(℃) value"
     //% color=#EA5532 weight=55
-    export function ds18b20Read(port: DigitalPin): number {
+    export function ds18b20Read(port: DigitalPort): number {
+        let pin = portToDigitalPin(port);
         // 初始化OneWire总线
-        if (!oneWireReset(port)) {
+        if (!oneWireReset(pin)) {
             return -1; // 如果没有检测到设备，返回-1
         }
 
         // 跳过ROM命令并开始温度转换
-        oneWireWriteByte(port, SKIP_ROM); // 0xCC
-        oneWireWriteByte(port, DS18B20_CONVERT_T); // 0x44
+        oneWireWriteByte(pin, SKIP_ROM); // 0xCC
+        oneWireWriteByte(pin, DS18B20_CONVERT_T); // 0x44
 
         // 等待转换完成，通常最多需要750毫秒
         basic.pause(750);
 
         // 重新初始化OneWire总线
-        if (!oneWireReset(port)) {
+        if (!oneWireReset(pin)) {
             return -1; // 如果没有检测到设备，返回-1
         }
 
         // 跳过ROM命令并读取暂存器
-        oneWireWriteByte(port, SKIP_ROM); // 0xCC
-        oneWireWriteByte(port, DS18B20_READ_SCRATCHPAD); // 0xBE
+        oneWireWriteByte(pin, SKIP_ROM); // 0xCC
+        oneWireWriteByte(pin, DS18B20_READ_SCRATCHPAD); // 0xBE
 
         // 读取两个字节的数据，第一个字节是温度的低位，第二个字节是高位
-        let low = oneWireReadByte(port);
-        let high = oneWireReadByte(port);
+        let low = oneWireReadByte(pin);
+        let high = oneWireReadByte(pin);
 
         // 将高低字节组合成16位整数
         let temp = ((high << 8) | low);
@@ -532,6 +537,6 @@ namespace petal {
     //% blockId="Accel" block="Accelerometer sensor read %state value"
     //% color=#00B1ED weight=5
     export function AccelRead(state: AccelerometerState): number {
-
+        return 0
     }
 }
