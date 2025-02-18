@@ -84,6 +84,9 @@
   "Petal_Display.create|block": "引脚%Port|初始化灯带|%numleds|颗LED（模式%mode|）",
   "Petal_Display.hsl|block": "色相 %h|饱和度 %s|亮度 %l",
   "Petal_Display.rgb|block": "RGB（红%red|绿%green|蓝%blue|）",
+  "{id:group}Digital": "数字接口",
+  "{id:group}Analog": "模拟接口",
+  "{id:group}IIC": "IIC接口",
   "petal|block": "花瓣_基础",
   "Petal_Display|block": "花瓣_RGB",
   "{id:subcategory}Neopixel": "彩灯单元"

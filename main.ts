@@ -2,6 +2,7 @@
 * Functions to Petal sensor by ELECFREAKS Co.,Ltd.
 */
 //% color=#00B1ED  icon="\uf005" block="Petal_Base" blockId="Petal_Base"
+//% groups='["Digital", "Analog", "IIC"]'
 namespace petal {
     export enum DigitalPort {
         //% block="J1"
@@ -43,11 +44,11 @@ namespace petal {
     }
 
     export enum _6AxisState {
-        //% block="AX(mg)"
+        //% block="AX(g)"
         AX,
-        //% block="AY(mg)"
+        //% block="AY(g)"
         AY,
-        //% block="AZ(mg)"
+        //% block="AZ(g)"
         AZ,
         //% block="GX(°/s)"
         GX,
@@ -110,7 +111,7 @@ namespace petal {
     }
 
     //% blockId=button block="Button sensor %port is pressed"
-    //% color=#EA5532 weight=100
+    //% color=#EA5532 weight=100 group="Digital"
     export function buttonRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
         pins.setPull(pin, PinPullMode.PullUp)
@@ -118,7 +119,7 @@ namespace petal {
     }
 
     //% blockId=hall block="Hall sensor %port is attracted"
-    //% color=#EA5532 weight=95
+    //% color=#EA5532 weight=95 group="Digital"
     export function hallRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
         pins.setPull(pin, PinPullMode.PullUp)
@@ -126,7 +127,7 @@ namespace petal {
     }
 
     //% blockId=pir block="PIR sensor %port detects motion"
-    //% color=#EA5532 weight=90
+    //% color=#EA5532 weight=90 group="Digital"
     export function pirRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
         pins.setPull(pin, PinPullMode.PullUp)
@@ -135,7 +136,7 @@ namespace petal {
 
     //% blockId=buzzer block="Buzzer sensor %port play ring tone (Hz)|%note=device_note" blockGap=8
     //% help=music/ring-tone
-    //% color=#EA5532 weight=85
+    //% color=#EA5532 weight=85 group="Digital"
     //% parts="headphone"
     //% useEnumVal=1
     export function buzzerWrite(port: AnalogPort, frequency: number): void {
@@ -148,21 +149,21 @@ namespace petal {
     }
 
     //% blockId="trimpot" block="Trimpot sensor %port analog value"
-    //% color=#E2C438 weight=40
+    //% color=#E2C438 weight=40 group="Analog"
     export function trimpotRead(port: AnalogPort): number {
         let pin = portToAnalogPin(port)
         return pins.analogReadPin(pin)
     }
 
     //% blockId="noise" block="Noise sensor %port analog value"
-    //% color=#E2C438 weight=35
+    //% color=#E2C438 weight=35 group="Analog"
     export function noiseRead(port: AnalogPort): number {
         let pin = portToAnalogPin(port)
         return pins.analogReadPin(pin)
     }
 
     //% blockId="photocell" block="Photocell sensor %port light intensity(lux)"
-    //% color=#E2C438 weight=35
+    //% color=#E2C438 weight=35 group="Analog"
     export function photocellRead(port: AnalogPort): number {
         let pin = portToAnalogPin(port)
         let voltage = 0
@@ -183,7 +184,7 @@ namespace petal {
     }
 
     //% blockId="redled" block="Red led sensor %port %state"
-    //% color=#EA5532 weight=80
+    //% color=#EA5532 weight=80 group="Digital"
     export function redLedWrite(port: DigitalPort, state: SwitchState): void {
         let pin = portToDigitalPin(port)
         switch (state) {
@@ -197,7 +198,7 @@ namespace petal {
     }
 
     //% blockId="uvLevel" block="UV sensor %Rjpin level(0~15)"
-    //% color=#E2C438 weight=30
+    //% color=#E2C438 weight=30 group="Analog"
     export function uvLevelRead(port: AnalogPort): number {
         let pin = portToAnalogPin(port)
         let UVlevel = pins.analogReadPin(pin);
@@ -215,7 +216,7 @@ namespace petal {
     }
 
     //% blockId=vibrationDetection block="Vibration detection sensor %port vibration detected"
-    //% color=#EA5532 weight=75
+    //% color=#EA5532 weight=75 group="Digital"
     export function vibrationDetectionRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
         pins.setPull(pin, PinPullMode.PullUp)
@@ -223,7 +224,7 @@ namespace petal {
     }
 
     //% blockId=tilt block="Tilt sensor %port Tilt detected"
-    //% color=#EA5532 weight=70
+    //% color=#EA5532 weight=70 group="Digital"
     export function tiltRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
         pins.setPull(pin, PinPullMode.PullUp)
@@ -231,7 +232,7 @@ namespace petal {
     }
 
     //% blockId="vibratorMotor" block="Vibrator motor sensor %port %state"
-    //% color=#EA5532 weight=65
+    //% color=#EA5532 weight=65 group="Digital"
     export function vibratorMotorWrite(port: DigitalPort, state: SwitchState): void {
         let pin = portToDigitalPin(port)
         switch (state) {
@@ -282,7 +283,7 @@ namespace petal {
         return false;
     }
     //% blockId="petalTempRH" block="Temp and RH sensor %state value"
-    //% color=#00B1ED weight=20
+    //% color=#00B1ED weight=20 group="IIC"
     export function petalTempRHRead(state: TempAndRh): number {
         initAHT20()
         let flagCnt = 3
@@ -300,7 +301,7 @@ namespace petal {
 
 
     //% blockId=optoelectronic block="Optoelectronic sensor %port Obstruction detected"
-    //% color=#EA5532 weight=60
+    //% color=#EA5532 weight=60 group="Digital"
     export function optoelectronicRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
         pins.setPull(pin, PinPullMode.PullUp)
@@ -308,7 +309,7 @@ namespace petal {
     }
 
     //% blockId="dlight" block="Dlight sensor light value"
-    //% color=#00B1ED weight=17
+    //% color=#00B1ED weight=17 group="IIC"
     export function dlightRead(): number {
         let Address = 35
         pins.i2cWriteNumber(Address, 0x10, NumberFormat.UInt8BE)
@@ -320,7 +321,7 @@ namespace petal {
     let HBTtemperature = 0.0;
 
     //% blockId="hbt" block="Hbt sensor read temperature value"
-    //% color=#00B1ED weight=15
+    //% color=#00B1ED weight=15 group="IIC"
     export function hbtRead(): number {
         let buff = pins.createBuffer(2);
 
@@ -393,7 +394,7 @@ namespace petal {
         return dat
     }
     //% blockId=ds18b20 block="ds18b20 sensor %port read %state value"
-    //% color=#EA5532 weight=55
+    //% color=#EA5532 weight=55 group="Digital"
     export function Ds18b20Temp(port: DigitalPort, state: DS18B20ValType): number {
         let pin = portToDigitalPin(port);
         init_18b20(pin)
@@ -483,7 +484,7 @@ namespace petal {
 
 
     //% blockId="_6AxisImu" block="six AxisImu sensor read %state value"
-    //% color=#00B1ED weight=10
+    //% color=#00B1ED weight=10 group="IIC"
     export function _6AxisImuRead(state: _6AxisState): number {
         if (_6AxisImuFlag == true) {
             initSensor();
@@ -610,7 +611,7 @@ namespace petal {
     }
 
     //% blockId="Accel" block="Accelerometer sensor read %state value %Range"
-    //% color=#00B1ED weight=5
+    //% color=#00B1ED weight=5 group="IIC"
     export function AccelRead(state: AccelerometerState, Range: ScaleRange): number {
         if (accelFlag) {
             initAccel(Range); // 默认设置为±2g量程

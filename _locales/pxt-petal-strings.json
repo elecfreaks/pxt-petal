@@ -79,6 +79,9 @@
   "Petal_Display.create|block": "NeoPixel at pin %Port|with %numleds|leds as %mode",
   "Petal_Display.rgb|block": "red %red|green %green|blue %blue",
   "Petal_Display.colors|block": "%color",
+  "{id:group}Digital": "Digital Port",
+  "{id:group}Analog": "Analog Port",
+  "{id:group}IIC": "IIC Port",
   "petal|block": "Petal_Base",
   "Petal_Display.hsl|block": "hue %h|saturation %s|luminosity %l",
   "Petal_Display|block": "Petal_Display"
