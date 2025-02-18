@@ -83,8 +83,7 @@
   "Petal_Display.colors|block": "%color",
   "Petal_Display.create|block": "引脚%pin|初始化灯带|%numleds|颗LED（模式%mode|）",
   "Petal_Display.hsl|block": "色相 %h|饱和度 %s|亮度 %l",
-  "Petal_Basic|block": "花瓣_基础",
-  "{id:category}Petal_Basic": "花瓣_基础",
+  "Petal_Base|block": "花瓣_基础",
   "{id:category}Petal_Display": "花瓣_RGB",
   "{id:subcategory}Neopixel": "彩灯单元"
 }

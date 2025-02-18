@@ -43,11 +43,11 @@ namespace petal {
     }
 
     export enum _6AxisState {
-        //% block="AX(g)"
+        //% block="AX(mg)"
         AX,
-        //% block="AY(g)"
+        //% block="AY(mg)"
         AY,
-        //% block="AZ(g)"
+        //% block="AZ(mg)"
         AZ,
         //% block="GX(°/s)"
         GX,
