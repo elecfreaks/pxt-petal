@@ -521,81 +521,101 @@ namespace petal {
     }
 
     //Accelerometer Sensor
-
-    // LIS3DH I2C地址
-    const LIS3DH_I2C_ADDRESS = 0x19;
+    let lis3dhAddress = 0x19; // 默认I2C地址
+    let scaleFactor = 16384; // 对于±2g量程，默认比例因子
     let accelFlag = true;
 
-
     /**
-     * 初始化LIS3DH加速度计。
+     * 初始化加速度计
      */
-    function initializeLIS3DH(): void {
-        // 设置正常模式
-        pins.i2cWriteNumber(LIS3DH_I2C_ADDRESS, 0x20, NumberFormat.UInt8BE);
-        basic.pause(10);
-
-        let whoAmI = pins.i2cReadNumber(LIS3DH_I2C_ADDRESS, NumberFormat.UInt8BE, false);
-        if (whoAmI != 0x33) { // LIS3DH的WHO_AM_I寄存器默认值为0x33
-            serial.writeString("Ooops, no LIS3DH detected at ");
-            serial.writeNumber(LIS3DH_I2C_ADDRESS);
-            serial.writeString("\nCheck your wiring!\n");
-
-            i2cScan();
-            while (true) {
-                // 无限循环，检测失败时停止执行
-            }
-        } else {
-            serial.writeString("LIS3DH found at ");
-            serial.writeNumber(LIS3DH_I2C_ADDRESS);
-            serial.writeString("!\n");
-
-            // 设置量程为±4G
-            setRange(LIS3DH_I2C_ADDRESS, 0x08); // 对应LIS3DH_RANGE_4_G
+    function initAccel() {
+        // 确认设备ID
+        let whoAmIReg = 0x0F;
+        pins.i2cWriteNumber(lis3dhAddress, whoAmIReg, NumberFormat.UInt8BE, false);
+        let whoAmI = pins.i2cReadNumber(lis3dhAddress, NumberFormat.UInt8BE, true);
+        serial.writeLine("Reading WHO_AM_I: ");
+        serial.writeNumber(whoAmI);
+        if (whoAmI != 0x33) {
+            serial.writeLine("Device ID mismatch: ");
+            serial.writeNumber(whoAmI);
+            return; // 如果WHO_AM_I不是0x33，说明连接有问题或者地址不对
         }
+        serial.writeLine("Device ID confirmed: ");
+        serial.writeNumber(whoAmI);
+
+        // 设置CTRL_REG1: 设置为50Hz输出速率，所有轴启用
+        let configReg1 = 0x20;
+        let configValue1 = 0x77; // 50Hz, all axes enabled
+        writeRegister1(configReg1, configValue1);
+
+        // 设置CTRL_REG4: 设置量程为±2g
+        let configReg4 = 0x23;
+        let configValue4 = 0x00; // ±2g
+        writeRegister1(configReg4, configValue4);
+
+        serial.writeLine("Initialization complete.");
     }
 
-    function setRange(address: number, range: number): void {
-        pins.i2cWriteNumber(address, 0x20 | 0x10, NumberFormat.UInt8BE); // CTRL_REG1_A
-        basic.pause(10);
-        pins.i2cWriteNumber(address, range, NumberFormat.UInt8BE); // CTRL_REG4_A
-        basic.pause(10);
+    /**
+     * 写入寄存器值
+     * @param reg 寄存器地址
+     * @param value 要写入的值
+     */
+    function writeRegister1(reg: number, value: number) {
+        let buffer = pins.createBuffer(2);
+        buffer[0] = reg;
+        buffer[1] = value;
+        pins.i2cWriteBuffer(lis3dhAddress, buffer, false);
+        control.waitMicros(10); // 等待写入完成
+    }
+
+    /**
+     * 从指定的寄存器读取16位的数据
+     * @param reg 加速度计寄存器地址
+     */
+    function read16(reg: number): number {
+        let buffer = pins.createBuffer(1);
+        buffer[0] = reg | 0x80; // 设置最高位为1表示连续读取
+        pins.i2cWriteBuffer(lis3dhAddress, buffer, false);
+
+        // 读取两个字节的数据
+        buffer = pins.i2cReadBuffer(lis3dhAddress, 2, false);
+        let value = buffer.getNumber(NumberFormat.Int16LE, 0);
+
+        serial.writeLine("Raw register data: ");
+        serial.writeNumber(buffer.getNumber(NumberFormat.UInt16LE, 0));
+
+        return value;
     }
 
     //% blockId="Accel" block="Accelerometer sensor read %state value"
     //% color=#00B1ED weight=5
     export function AccelRead(state: AccelerometerState): number {
-        if (accelFlag == true) {
-            initializeLIS3DH();
+        if (accelFlag) {
+            initAccel();
             accelFlag = false;
         }
-        let axisReg;
+
+        let value = 0;
         switch (state) {
             case AccelerometerState.X:
-                axisReg = 0x28; // OUT_X_L
+                value = read16(0x28); // OUT_X_L and OUT_X_H
                 break;
             case AccelerometerState.Y:
-                axisReg = 0x2A; // OUT_Y_L
+                value = read16(0x2A); // OUT_Y_L and OUT_Y_H
                 break;
             case AccelerometerState.Z:
-                axisReg = 0x2C; // OUT_Z_L
+                value = read16(0x2C); // OUT_Z_L and OUT_Z_H
                 break;
-            default:
-                return 0; // 如果状态无效，返回0
         }
-
-        // 读取低字节和高字节
-        let low = pins.i2cReadNumber(LIS3DH_I2C_ADDRESS, NumberFormat.UInt8BE, false, axisReg);
-        let high = pins.i2cReadNumber(LIS3DH_I2C_ADDRESS, NumberFormat.UInt8BE, true, axisReg + 1);
-
-        // 组合高低字节得到16位整数
-        let value = ((high << 8) | low);
-
-        // 将16位值转换为有符号整数
-        if (value & 0x8000) value = -(0x10000 - value);
-
-        // 转换为m/s^2，假设当前量程为±4G
-        // 每个LSB对应4mg (毫g)
-        return value * 0.004;
+        // 将原始数据转换为g-force
+        serial.writeLine("Raw value: ");
+        serial.writeNumber(value);
+        let gForce = value / scaleFactor;
+        serial.writeLine("G-force: ");
+        serial.writeNumber(gForce);
+        return gForce;
     }
+
+
 }
