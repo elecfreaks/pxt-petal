@@ -637,6 +637,6 @@ namespace petal {
         // 将g-force转换为mg
         let mgForce = gForce * 1000;
 
-        return mgForce;
+        return Math.round(mgForce);
     }
 }
