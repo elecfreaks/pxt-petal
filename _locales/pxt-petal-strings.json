@@ -24,7 +24,6 @@
   "petal.ScaleRange.Range_2G|block": "(±2g)",
   "petal.ScaleRange.Range_4G|block": "(±4g)",
   "petal.ScaleRange.Range_8G|block": "(±8g)",
-  "petal|block": "Petal_Base",
   "petal.buttonRead|block": "Button sensor %port is pressed",
   "petal.hallRead|block": "Hall sensor %port is attracted",
   "petal.pirRead|block": "PIR sensor %port detects motion",
@@ -80,6 +79,7 @@
   "Petal_Display.create|block": "NeoPixel at pin %Port|with %numleds|leds as %mode",
   "Petal_Display.rgb|block": "red %red|green %green|blue %blue",
   "Petal_Display.colors|block": "%color",
+  "petal|block": "Petal_Base",
   "Petal_Display.hsl|block": "hue %h|saturation %s|luminosity %l",
   "Petal_Display|block": "Petal_Display"
 }

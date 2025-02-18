@@ -81,9 +81,10 @@
   "Petal_Display.TM1637LEDs.showNumber|block": "%display|显示数字|%num",
   "Petal_Display.TM1637LEDs.showbit|block": "%display|显示单个数字|%num|在第|%bit 位",
   "Petal_Display.colors|block": "%color",
-  "Petal_Display.create|block": "引脚%pin|初始化灯带|%numleds|颗LED（模式%mode|）",
+  "Petal_Display.create|block": "引脚%Port|初始化灯带|%numleds|颗LED（模式%mode|）",
   "Petal_Display.hsl|block": "色相 %h|饱和度 %s|亮度 %l",
-  "Petal_Base|block": "花瓣_基础",
-  "{id:category}Petal_Display": "花瓣_RGB",
+  "Petal_Display.rgb|block": "RGB（红%red|绿%green|蓝%blue|）",
+  "Petal|block": "花瓣_基础",
+  "Petal_Display|block": "花瓣_RGB",
   "{id:subcategory}Neopixel": "彩灯单元"
 }
