@@ -184,7 +184,7 @@ namespace petal {
 
     //% blockId="redled" block="Red led sensor %port %state"
     //% color=#EA5532 weight=80
-    export function redLedWritr(port: DigitalPort, state: SwitchState): void {
+    export function redLedWrite(port: DigitalPort, state: SwitchState): void {
         let pin = portToDigitalPin(port)
         switch (state) {
             case SwitchState.Open:
@@ -232,7 +232,7 @@ namespace petal {
 
     //% blockId="vibratorMotor" block="Vibrator motor sensor %port %state"
     //% color=#EA5532 weight=65
-    export function vibratorMotorWritr(port: DigitalPort, state: SwitchState): void {
+    export function vibratorMotorWrite(port: DigitalPort, state: SwitchState): void {
         let pin = portToDigitalPin(port)
         switch (state) {
             case SwitchState.Open:
@@ -500,11 +500,11 @@ namespace petal {
         //结果保留两位小数
         switch (state) {
             case _6AxisState.AX:
-                return Math.round(data.ax * 0.0061035) / 100;
+                return Math.round(data.ax * 0.061035);
             case _6AxisState.AY:
-                return Math.round(data.ay * 0.0061035) / 100;
+                return Math.round(data.ay * 0.061035);
             case _6AxisState.AZ:
-                return Math.round(data.az * 0.0061035) / 100;
+                return Math.round(data.az * 0.061035);
             case _6AxisState.GX:
                 return Math.round(data.gx * 0.0076294) / 100;
             case _6AxisState.GY:

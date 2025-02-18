@@ -10,7 +10,9 @@
     "files": [
         "README.md",
         "main.ts",
-        "display.ts"
+        "display.ts",
+        "_locales/zh-CN/pxt-Petal-strings.json",
+        "_locales/zh-CN/pxt-Petal-jsdoc-strings.json"
     ],
     "public": true,
     "targetVersions": {
