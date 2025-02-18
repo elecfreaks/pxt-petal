@@ -4,8 +4,8 @@
 //% color=#EA5532 icon="\uf110" block="Petal_Display" blockId="Petal_Display" 
 namespace Petal_Display {
     ///////////////////////////////enum
-    export enum DigitalRJPin {
-        //% block="J1" 
+    export enum DigitalPort {
+        //% block="J1"
         J1,
         //% block="J2"
         J2,
@@ -14,12 +14,13 @@ namespace Petal_Display {
         //% block="J4"
         J4
     }
-    export enum AnalogRJPin {
+    export enum AnalogPort {
         //% block="J1"
         J1,
         //% block="J2"
         J2
     }
+    
     export enum EmojiList {
         //% block="😆"
         Grinning_Squinting_Face,
@@ -53,6 +54,38 @@ namespace Petal_Display {
         White = 0xFFFFFF,
         //% block=black
         Black = 0x000000
+    }
+
+    export function portToAnalogPin(port: AnalogPort): any {
+        let pin = AnalogPin.P1
+        switch (port) {
+            case AnalogPort.J1:
+                pin = AnalogPin.P1
+                break;
+            case AnalogPort.J2:
+                pin = AnalogPin.P2
+                break;
+        }
+        return pin
+    }
+
+    export function portToDigitalPin(port: DigitalPort): any {
+        let pin = DigitalPin.P1
+        switch (port) {
+            case DigitalPort.J1:
+                pin = DigitalPin.P1
+                break;
+            case DigitalPort.J2:
+                pin = DigitalPin.P2
+                break;
+            case DigitalPort.J3:
+                pin = DigitalPin.P13
+                break;
+            case DigitalPort.J4:
+                pin = DigitalPin.P15
+                break;
+        }
+        return pin
     }
 
     /**
@@ -322,27 +355,13 @@ namespace Petal_Display {
      * @param pin the pin where the neopixel is connected.
      * @param numleds number of leds in the strip, eg: 24,30,60,64
      */
-    //% blockId="neopixel_create" block="NeoPixel at pin %Rjpin|with %numleds|leds as %mode"
+    //% blockId="neopixel_create" block="NeoPixel at pin %Port|with %numleds|leds as %mode"
     //% weight=90 color=#EA5532
     //% parts="neopixel"
     //% trackArgs=0,2
     //% blockSetVariable=strip subcategory=Neopixel
-    export function create(Rjpin: DigitalRJPin, numleds: number, mode: NeoPixelMode): Strip {
-        let pin = DigitalPin.P1
-        switch (Rjpin) {
-            case DigitalRJPin.J1:
-                pin = DigitalPin.P8
-                break;
-            case DigitalRJPin.J2:
-                pin = DigitalPin.P12
-                break;
-            case DigitalRJPin.J3:
-                pin = DigitalPin.P14
-                break;
-            case DigitalRJPin.J4:
-                pin = DigitalPin.P16
-                break;
-        }
+    export function create(Port: DigitalPort, numleds: number, mode: NeoPixelMode): Strip {
+        let pin = portToDigitalPin(Port)
         let strip = new Strip();
         let stride = mode === NeoPixelMode.RGBW ? 4 : 3;
         strip.buf = pins.createBuffer(numleds * stride);
