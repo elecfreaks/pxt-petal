@@ -60,12 +60,21 @@ namespace petal {
     }
 
     export enum AccelerometerState {
-        //% block="X(m/s^2)"
+        //% block="X(mg)"
         X,
-        //% block="Y(m/s^2)"
+        //% block="Y(mg)"
         Y,
-        //% block="Z(m/s^2)"
+        //% block="Z(mg)"
         Z
+    }
+
+    export enum ScaleRange {
+        //% block="(±2g)"
+        Range_2G = 2,
+        //% block="(±4g)"
+        Range_4G = 4,
+        //% block="(±8g)"
+        Range_8G = 8
     }
 
     export function portToAnalogPin(port: AnalogPort): any {
@@ -527,33 +536,24 @@ namespace petal {
 
     /**
      * 初始化加速度计
+     * @param range 选择量程
      */
-    function initAccel() {
+    function initAccel(range: ScaleRange) {
         // 确认设备ID
         let whoAmIReg = 0x0F;
         pins.i2cWriteNumber(lis3dhAddress, whoAmIReg, NumberFormat.UInt8BE, false);
         let whoAmI = pins.i2cReadNumber(lis3dhAddress, NumberFormat.UInt8BE, true);
-        serial.writeLine("Reading WHO_AM_I: ");
-        serial.writeNumber(whoAmI);
         if (whoAmI != 0x33) {
-            serial.writeLine("Device ID mismatch: ");
-            serial.writeNumber(whoAmI);
             return; // 如果WHO_AM_I不是0x33，说明连接有问题或者地址不对
         }
-        serial.writeLine("Device ID confirmed: ");
-        serial.writeNumber(whoAmI);
 
         // 设置CTRL_REG1: 设置为50Hz输出速率，所有轴启用
         let configReg1 = 0x20;
         let configValue1 = 0x77; // 50Hz, all axes enabled
-        writeRegister1(configReg1, configValue1);
+        writeRegister3dh(configReg1, configValue1);
 
-        // 设置CTRL_REG4: 设置量程为±2g
-        let configReg4 = 0x23;
-        let configValue4 = 0x00; // ±2g
-        writeRegister1(configReg4, configValue4);
-
-        serial.writeLine("Initialization complete.");
+        // 设置CTRL_REG4: 设置量程
+        setScaleRange(range);
     }
 
     /**
@@ -561,12 +561,38 @@ namespace petal {
      * @param reg 寄存器地址
      * @param value 要写入的值
      */
-    function writeRegister1(reg: number, value: number) {
+    function writeRegister3dh(reg: number, value: number) {
         let buffer = pins.createBuffer(2);
         buffer[0] = reg;
         buffer[1] = value;
         pins.i2cWriteBuffer(lis3dhAddress, buffer, false);
         control.waitMicros(10); // 等待写入完成
+    }
+
+    /**
+     * 设置量程
+     * @param range 选择量程
+     */
+    function setScaleRange(range: ScaleRange) {
+        let configReg4 = 0x23;
+        let configValue4 = 0x00;
+
+        switch (range) {
+            case ScaleRange.Range_2G:
+                configValue4 = 0x00; // ±2g
+                scaleFactor = 16384;
+                break;
+            case ScaleRange.Range_4G:
+                configValue4 = 0x10; // ±4g
+                scaleFactor = 8192;
+                break;
+            case ScaleRange.Range_8G:
+                configValue4 = 0x30; // ±8g
+                scaleFactor = 4096;
+                break;
+        }
+
+        writeRegister3dh(configReg4, configValue4);
     }
 
     /**
@@ -582,17 +608,14 @@ namespace petal {
         buffer = pins.i2cReadBuffer(lis3dhAddress, 2, false);
         let value = buffer.getNumber(NumberFormat.Int16LE, 0);
 
-        serial.writeLine("Raw register data: ");
-        serial.writeNumber(buffer.getNumber(NumberFormat.UInt16LE, 0));
-
         return value;
     }
 
-    //% blockId="Accel" block="Accelerometer sensor read %state value"
+    //% blockId="Accel" block="Accelerometer sensor read %state value %Range"
     //% color=#00B1ED weight=5
-    export function AccelRead(state: AccelerometerState): number {
+    export function AccelRead(state: AccelerometerState, Range: ScaleRange): number {
         if (accelFlag) {
-            initAccel();
+            initAccel(Range); // 默认设置为±2g量程
             accelFlag = false;
         }
 
@@ -609,13 +632,11 @@ namespace petal {
                 break;
         }
         // 将原始数据转换为g-force
-        serial.writeLine("Raw value: ");
-        serial.writeNumber(value);
         let gForce = value / scaleFactor;
-        serial.writeLine("G-force: ");
-        serial.writeNumber(gForce);
-        return gForce;
+
+        // 将g-force转换为mg
+        let mgForce = gForce * 1000;
+
+        return mgForce;
     }
-
-
 }
