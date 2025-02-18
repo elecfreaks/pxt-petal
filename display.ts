@@ -2,7 +2,7 @@
 * Functions to Petal sensor by ELECFREAKS Co.,Ltd.
 */
 //% color=#EA5532 icon="\uf110" block="Petal_Display" blockId="Petal_Display" 
-namespace PlanetX_Display {
+namespace Petal_Display {
     ///////////////////////////////enum
     export enum DigitalRJPin {
         //% block="J1" 
