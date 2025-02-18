@@ -222,8 +222,6 @@ namespace petal {
         return pins.digitalReadPin(pin) == 1
     }
 
-    //todo RGB
-
     //% blockId=tilt block="Tilt sensor %port Tilt detected"
     //% color=#EA5532 weight=70
     export function tiltRead(port: DigitalPort): boolean {
