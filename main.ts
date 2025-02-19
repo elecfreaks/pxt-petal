@@ -229,15 +229,15 @@ namespace petal {
     export function vibrationDetectionRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
         pins.setPull(pin, PinPullMode.PullUp)
-        return pins.digitalReadPin(pin) == 1
+        return pins.digitalReadPin(pin) == 0
     }
 
-    //% blockId=tilt block="Tilt sensor %port Tilt detected"
+    //% blockId=tilt block="Tilt sensor %port Tilt lift detected"
     //% color=#EA5532 weight=70 group="Digital"
     export function tiltRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
         pins.setPull(pin, PinPullMode.PullUp)
-        return pins.digitalReadPin(pin) == 1
+        return pins.digitalReadPin(pin) == 0
     }
 
     //% blockId="vibratorMotor" block="Vibrator motor sensor %port %state"

@@ -34,7 +34,7 @@
   "petal.redLedWrite|block": "红色LED灯 %port %state",
   "petal.uvLevelRead|block": "紫外线传感器 %Rjpin 级别(0~15)",
   "petal.vibrationDetectionRead|block": "振动检测传感器 %port 检测到振动",
-  "petal.tiltRead|block": "倾斜传感器 %port 检测到倾斜",
+  "petal.tiltRead|block": "倾斜传感器 %port 检测到向左倾斜",
   "petal.vibratorMotorWrite|block": "振动马达传感器 %port %state",
   "petal.petalTempRHRead|block": "温湿度传感器 %state 值",
   "petal.optoelectronicRead|block": "光电传感器 %port 检测到遮挡",
