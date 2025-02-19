@@ -115,7 +115,7 @@ namespace petal {
     export function buttonRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
         pins.setPull(pin, PinPullMode.PullUp)
-        return pins.digitalReadPin(pin) == 1
+        return pins.digitalReadPin(pin) == 0
     }
 
     //% blockId=hall block="Hall sensor %port is attracted"
@@ -123,7 +123,7 @@ namespace petal {
     export function hallRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
         pins.setPull(pin, PinPullMode.PullUp)
-        return pins.digitalReadPin(pin) == 1
+        return pins.digitalReadPin(pin) == 0
     }
 
     //% blockId=pir block="PIR sensor %port detects motion"
@@ -141,13 +141,22 @@ namespace petal {
     //% useEnumVal=1
     export function buzzerWrite(port: AnalogPort, frequency: number): void {
         let pin = portToAnalogPin(port);
-        let periodUs = 1000000 / frequency;
-        pins.analogWritePin(pin, 0);
-        pins.analogSetPeriod(pin, Math.idiv(periodUs, 2));
-        let dutyCycle = 512;
-        pins.analogWritePin(pin, dutyCycle);
-    }
 
+        if (frequency < 20) {
+            pins.analogWritePin(pin, 0);
+            return;
+        }
+        const MIN_PERIOD_US = 200; // 对应约5kHz，可根据实际情况调整
+        const MAX_PERIOD_US = 50000; // 对应20Hz
+        let periodUs = Math.max(MIN_PERIOD_US, Math.min(1000000 / frequency, MAX_PERIOD_US));
+
+        pins.analogWritePin(pin, 0); 
+
+        pins.analogSetPeriod(pin, Math.idiv(periodUs, 2));
+
+        let dutyCycle = 512;
+        pins.analogWritePin(pin, dutyCycle); 
+    }
     //% blockId="trimpot" block="Trimpot sensor %port analog value"
     //% color=#E2C438 weight=40 group="Analog"
     export function trimpotRead(port: AnalogPort): number {
@@ -189,10 +198,10 @@ namespace petal {
         let pin = portToDigitalPin(port)
         switch (state) {
             case SwitchState.Open:
-                pins.digitalWritePin(pin, 1)
+                pins.digitalWritePin(pin, 0)
                 break;
             case SwitchState.Off:
-                pins.digitalWritePin(pin, 0)
+                pins.digitalWritePin(pin, 1)
                 break;
         }
     }
