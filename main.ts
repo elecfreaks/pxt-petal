@@ -139,8 +139,8 @@ namespace petal {
     //% color=#EA5532 weight=85 group="Digital"
     //% parts="headphone"
     //% useEnumVal=1
-    export function buzzerWrite(port: AnalogPort, frequency: number): void {
-        let pin = portToAnalogPin(port);
+    export function buzzerWrite(port: DigitalPort, frequency: number): void {
+        let pin = portToDigitalPin(port);
 
         if (frequency < 20) {
             pins.analogWritePin(pin, 0);
@@ -152,11 +152,19 @@ namespace petal {
 
         pins.analogWritePin(pin, 0); 
 
-        pins.analogSetPeriod(pin, Math.idiv(periodUs, 2));
+        pins.analogSetPeriod(pin, periodUs);
 
         let dutyCycle = 512;
         pins.analogWritePin(pin, dutyCycle); 
     }
+
+    //% block="Stop buzzer on %port"
+    //% color=#EA5532 weight=84 group="Digital"
+    export function stopBuzzer(port: DigitalPort): void {
+        let pin = portToDigitalPin(port);
+        pins.analogWritePin(pin, 0);
+    }
+
     //% blockId="trimpot" block="Trimpot sensor %port analog value"
     //% color=#E2C438 weight=40 group="Analog"
     export function trimpotRead(port: AnalogPort): number {

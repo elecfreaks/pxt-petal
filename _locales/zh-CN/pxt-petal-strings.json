@@ -28,6 +28,7 @@
   "petal.hallRead|block": "霍尔传感器 %port 被触发",
   "petal.pirRead|block": "人体红外传感器 %port 监测到运动",
   "petal.buzzerWrite|block": "蜂鸣器传感器 %port 播放铃声 (Hz)|%note=device_note",
+  "petal.stopBuzzer|block": "蜂鸣器传感器 %port 关闭",
   "petal.trimpotRead|block": "电位器传感器 %port 模拟值",
   "petal.noiseRead|block": "噪音传感器 %port 模拟值",
   "petal.photocellRead|block": "光敏传感器 %port 光强度(lux)",
