@@ -169,18 +169,36 @@ namespace petal {
     //% color=#E2C438 weight=40 group="Analog"
     export function trimpotRead(port: AnalogPort): number {
         let pin = portToAnalogPin(port)
-        return pins.analogReadPin(pin)
+        let voltage = 0
+        for (let index = 0; index < 20; index++) {
+            voltage = voltage + pins.analogReadPin(pin)
+        }
+        voltage = voltage / 20
+        if (voltage <= 3)
+        {
+            voltage = 3
+        } else if (voltage >= 1015)
+        {
+            voltage = 1015
+        }
+        return Math.round(Math.map(voltage, 3, 1015, 0, 1023))
     }
 
     //% blockId="noise" block="Noise sensor %port analog value"
     //% color=#E2C438 weight=35 group="Analog"
     export function noiseRead(port: AnalogPort): number {
         let pin = portToAnalogPin(port)
-        return pins.analogReadPin(pin)
+        let voltage = 0
+        for (let index = 0; index < 50; index++) {
+            basic.pause(1)
+            voltage = voltage + pins.analogReadPin(pin)
+        }
+        voltage = voltage / 100
+        return voltage
     }
 
     //% blockId="photocell" block="Photocell sensor %port light intensity(lux)"
-    //% color=#E2C438 weight=35 group="Analog"
+    //% color=#E2C438 weight=33 group="Analog"
     export function photocellRead(port: AnalogPort): number {
         let pin = portToAnalogPin(port)
         let voltage = 0
@@ -517,20 +535,20 @@ namespace petal {
 
         //结果保留两位小数
         switch (state) {
-            case _6AxisState.AX:
-                return Math.round(data.ax * 0.061035);
             case _6AxisState.AY:
+                return Math.round(data.ax * 0.061035);
+            case _6AxisState.AX:
                 return Math.round(data.ay * 0.061035);
             case _6AxisState.AZ:
                 return Math.round(data.az * 0.061035);
-            case _6AxisState.GX:
-                return Math.round(data.gx * 0.0076294) / 100;
             case _6AxisState.GY:
-                return Math.round(data.gy * 0.0076294) / 100;
+                return Math.round(data.gx * 0.0076294);
+            case _6AxisState.GX:
+                return Math.round(data.gy * 0.0076294);
             case _6AxisState.GZ:
-                return Math.round(data.gz * 0.0076294) / 100;
+                return Math.round(data.gz * 0.0076294);
             case _6AxisState._6Temperature:
-                return Math.round(data.temperature);
+                return Math.round(data.temperature * 10) / 10;
             default:
                 return 0;
         }
@@ -637,10 +655,10 @@ namespace petal {
 
         let value = 0;
         switch (state) {
-            case AccelerometerState.X:
+            case AccelerometerState.Y:
                 value = read16(0x28); // OUT_X_L and OUT_X_H
                 break;
-            case AccelerometerState.Y:
+            case AccelerometerState.X:
                 value = read16(0x2A); // OUT_Y_L and OUT_Y_H
                 break;
             case AccelerometerState.Z:
