@@ -134,35 +134,77 @@ namespace petal {
         return pins.digitalReadPin(pin) == 1
     }
 
+    export enum PlaybackMode {
+        //% block="UntilDone"
+        UntilDone,
+        //% block="InBackground"
+        InBackground,
+        //% block="LoopingInBackground"
+        LoopingInBackground
+    }
+
+    enum BeatFraction {
+        //% block=1
+        Whole = 1,
+        //% block="1/2"
+        Half = 2,
+        //% block="1/4"
+        Quarter = 4,
+        //% block="1/8"
+        Eighth = 8,
+        //% block="1/16"
+        Sixteenth = 16,
+        //% block="2"
+        Double = 32,
+        //% block="4",
+        Breve = 64
+    }
+
+    let currentBPM: number = 120;
+
+    //% blockId=set_bpm_block
+    //% block="set rhythm %bpm bpm"
+    //% bpm.min=40 bpm.max=500 bpm.defl=120
+    //% color=#EA5532 weight=87 group="Digital"
+    export function setBPM(bpm: number): void {
+        currentBPM = Math.max(1, Math.min(500, bpm)); // 限制范围1-500
+    }
+
+    //% block="Buzzer sensor %port play ring tone |%note=device_note %beat rhythm %mode"
+    //% beat.defl=BeatFraction.Whole
+    //% mode.defl=PlaybackMode.UntilDone
+    //% color=#EA5532 weight=86 group="Digital"
+    //% inlineInputMode=inline
+    //% help=music/ring-tone
+    //% parts="headphone"
+    //% useEnumVal=1
+    export function playIntegratedTone(
+        port: DigitalPort,
+        Note: number,
+        beat: BeatFraction,
+        mode: PlaybackMode,
+    ): void {
+        let pin = portToDigitalPin(port)
+        pins.setAudioPin(pin)
+        music.play(music.tonePlayable(Note, music.beat(beat)), mode)
+    }
+
+
     //% blockId=buzzer block="Buzzer sensor %port play ring tone (Hz)|%note=device_note" blockGap=8
     //% help=music/ring-tone
     //% color=#EA5532 weight=85 group="Digital"
     //% parts="headphone"
     //% useEnumVal=1
-    export function buzzerWrite(port: DigitalPort, frequency: number): void {
+    export function buzzerWrite(port: DigitalPort, Note:number): void {
         let pin = portToDigitalPin(port);
-
-        if (frequency < 20) {
-            pins.analogWritePin(pin, 0);
-            return;
-        }
-        const MIN_PERIOD_US = 200; // 对应约5kHz，可根据实际情况调整
-        const MAX_PERIOD_US = 50000; // 对应20Hz
-        let periodUs = Math.max(MIN_PERIOD_US, Math.min(1000000 / frequency, MAX_PERIOD_US));
-
-        pins.analogWritePin(pin, 0); 
-
-        pins.analogSetPeriod(pin, periodUs);
-
-        let dutyCycle = 512;
-        pins.analogWritePin(pin, dutyCycle); 
+        pins.setAudioPin(pin)
+        music.ringTone(Note)
     }
 
     //% block="Stop buzzer on %port"
     //% color=#EA5532 weight=84 group="Digital"
     export function stopBuzzer(port: DigitalPort): void {
-        let pin = portToDigitalPin(port);
-        pins.analogWritePin(pin, 0);
+        buzzerWrite(port,0);
     }
 
     //% blockId="trimpot" block="Trimpot sensor %port analog value"
