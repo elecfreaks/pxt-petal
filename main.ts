@@ -547,11 +547,16 @@ namespace petal {
     let currentAccelRange = 2; // 默认±2g
     let currentGyroRange = 512; // 默认±512dps
 
+    // 全局变量存储校准偏移量
+    let accelBias = { x: 0, y: 0, z: 0 };
+    let gyroBias = { x: 0, y: 0, z: 0 };
+    let isCalibrating = false;
+
     function initSensor(RangeA: number, RangeG: number) {
-        writeRegister(REG_SELFTEST, 0xA2);  // 启动自检
-        basic.pause(1750);                  // 等待自检完成
-        writeRegister(REG_SELFTEST, 0x00);  // 退出自检模式（部分传感器需要此操作）
-        basic.pause(100)
+        // writeRegister(REG_SELFTEST, 0xA2);  // 启动自检
+        // basic.pause(1750);                  // 等待自检完成
+        // writeRegister(REG_SELFTEST, 0x00);  // 退出自检模式（部分传感器需要此操作）
+        // basic.pause(100)
         writeRegister(REG_I2C_CONFIG, 0x60);    // 重新配置I2C
         basic.pause(100)
         let regValue = 0x00;
@@ -611,10 +616,52 @@ namespace petal {
         return { ax, ay, az, gx, gy, gz, temperature };
     }
 
+    //% block="six AxisImu sensor calibration (3 seconds)"
+    //% color=#00B1ED weight=11 group="IIC"
+    export function _6AxisImuWrite(): void {
+        isCalibrating = true;
+
+        // Step 1: 初始化采样数据
+        let accelSamples = { x: 0, y: 0, z: 0 };
+        let gyroSamples = { x: 0, y: 0, z: 0 };
+        const sampleCount = 200;  // 采样次数
+
+        // Step 2: 数据采集阶段
+        for (let i = 0; i < sampleCount; i++) {
+            let raw = readData();  // 获取原始数据
+
+            // 累加速度计数据（预期静止状态下各轴应为0）
+            accelSamples.x += raw.ax;
+            accelSamples.y += raw.ay;
+            accelSamples.z += raw.az;
+
+            // 累加陀螺仪数据（预期静止状态下各轴应为0）
+            gyroSamples.x += raw.gx;
+            gyroSamples.y += raw.gy;
+            gyroSamples.z += raw.gz;
+
+            basic.pause(10);  // 间隔10ms采样
+        }
+
+        // Step 3: 计算平均值
+        accelBias = {
+            x: accelSamples.x / sampleCount,
+            y: accelSamples.y / sampleCount,
+            z: accelSamples.z / sampleCount - (32768/currentAccelRange)  // 补偿Z轴重力影响（假设设备水平放置）
+        };
+
+        gyroBias = {
+            x: gyroSamples.x / sampleCount,
+            y: gyroSamples.y / sampleCount,
+            z: gyroSamples.z / sampleCount
+        };
+
+        isCalibrating = false;
+    }
 
     //% blockId="_6AxisImu" block="six AxisImu sensor read %state value %rangeA %RangeG"
     //% color=#00B1ED weight=10 group="IIC"
-    export function _6AxisImuRead(state: _6AxisState, RangeA: AccelScale6, RangeG:GyroRange6): number {
+    export function _6AxisImuRead(state: _6AxisState, RangeA: AccelScale6, RangeG: GyroRange6): number {
         if (_6AxisImuFlag == true) {
             currentAccelRange = RangeA;
             currentGyroRange = RangeG;
@@ -628,6 +675,13 @@ namespace petal {
         }
 
         let data = readData();
+
+        data.ax -= accelBias.x
+        data.ay -= accelBias.y
+        data.az -= accelBias.z
+        data.gx -= gyroBias.x
+        data.gy -= gyroBias.y
+        data.gz -= gyroBias.z
 
         // 加速度计：1 LSB = (1000 mg) / (灵敏度 LSB/g)
         let accelScale = (currentAccelRange * 1000.0) / 32768; // mg/LSB
