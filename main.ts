@@ -75,7 +75,9 @@ namespace petal {
         //% block="(±4g)"
         Range_4G = 4,
         //% block="(±8g)"
-        Range_8G = 8
+        Range_8G = 8,
+        //% block="(±16g)"
+        Range_16G = 16
     }
 
     export enum AccelScale6 {
@@ -616,7 +618,7 @@ namespace petal {
         return { ax, ay, az, gx, gy, gz, temperature };
     }
 
-    //% block="six AxisImu sensor calibration (3 seconds)"
+    //% block="six AxisImu sensor calibration (static 3 seconds)"
     //% color=#00B1ED weight=11 group="IIC"
     export function _6AxisImuWrite(): void {
         isCalibrating = true;
@@ -647,7 +649,7 @@ namespace petal {
         accelBias = {
             x: accelSamples.x / sampleCount,
             y: accelSamples.y / sampleCount,
-            z: accelSamples.z / sampleCount - (32768/currentAccelRange)  // 补偿Z轴重力影响（假设设备水平放置）
+            z: accelSamples.z / sampleCount - (32768 / currentAccelRange)  // 补偿Z轴重力影响（假设设备水平放置）
         };
 
         gyroBias = {
@@ -721,8 +723,12 @@ namespace petal {
 
     //Accelerometer Sensor
     let lis3dhAddress = 0x19; // 默认I2C地址
-    let scaleFactor = 16384; // 对于±2g量程，默认比例因子
+    let scaleFactor = 2; // 对于±2g量程，默认比例因子
     let accelFlag = true;
+
+    // 全局变量存储校准偏移量
+    let accelBias3 = { x: 0, y: 0, z: 0 };
+    let isCalibrating3 = false;
 
     /**
      * 初始化加速度计
@@ -765,24 +771,32 @@ namespace petal {
      */
     function setScaleRange(range: ScaleRange) {
         let configReg4 = 0x23;
-        let configValue4 = 0x00;
+        let fsValue = 0x00;
 
+        // 仅修改FS位（bit4-5），保留其他位
         switch (range) {
-            case ScaleRange.Range_2G:
-                configValue4 = 0x00; // ±2g
-                scaleFactor = 16384;
+            case ScaleRange.Range_2G:  // 00 -> ±2g
+                fsValue = 0x00;        // 二进制 00 << 4
+                scaleFactor = 2;
                 break;
-            case ScaleRange.Range_4G:
-                configValue4 = 0x10; // ±4g
-                scaleFactor = 8192;
+            case ScaleRange.Range_4G:  // 01 -> ±4g
+                fsValue = 0x10;        // 二进制 01 << 4
+                scaleFactor = 4;
                 break;
-            case ScaleRange.Range_8G:
-                configValue4 = 0x30; // ±8g
-                scaleFactor = 4096;
+            case ScaleRange.Range_8G:  // 10 -> ±8g
+                fsValue = 0x20;        // 二进制 10 << 4
+                scaleFactor = 8;
+                break;
+            case ScaleRange.Range_16G: // 11 -> ±16g
+                fsValue = 0x30;        // 二进制 11 << 4
+                scaleFactor = 16;
                 break;
         }
 
-        writeRegister3dh(configReg4, configValue4);
+        // 设置BDU（bit3）和HR（bit3）推荐配置
+        const BDU_ENABLE = 0x80; // 启用块数据更新
+        const HR_ENABLE = 0x08;  // 启用高分辨率模式
+        writeRegister3dh(configReg4, fsValue | BDU_ENABLE | HR_ENABLE);
     }
 
     /**
@@ -801,6 +815,45 @@ namespace petal {
         return value;
     }
 
+    function AccelReadData(): { ax: number, ay: number, az: number } {
+        basic.pause(5);
+        let ax = read16(0x28);
+        let ay = read16(0x2A);
+        let az = read16(0x2C);
+
+        return { ax, ay, az }
+
+    }
+
+    //% block="Accelerometer sensor calibration (static 3 seconds)"
+    //% color=#00B1ED weight=6 group="IIC"
+    export function AccelWrite(): void {
+        isCalibrating3 = true;
+
+        // Step 1: 初始化采样数据
+        let accelSamples = { x: 0, y: 0, z: 0 };
+        const sampleCount = 400;  // 采样次数
+
+        // Step 2: 数据采集阶段
+        for (let i = 0; i < sampleCount; i++) {
+            let raw = AccelReadData();  // 获取原始数据
+
+            // 累加速度计数据（预期静止状态下各轴应为0）
+            accelSamples.x += raw.ax;
+            accelSamples.y += raw.ay;
+            accelSamples.z += raw.az;
+        }
+
+        // Step 3: 计算平均值
+        accelBias3 = {
+            x: accelSamples.x / sampleCount,
+            y: accelSamples.y / sampleCount,
+            z: accelSamples.z / sampleCount - (32768 / scaleFactor)  // 补偿Z轴重力影响（假设设备水平放置）
+        };
+
+        isCalibrating3 = false;
+    }
+
     //% blockId="Accel" block="Accelerometer sensor read %state value %Range"
     //% color=#00B1ED weight=5 group="IIC"
     export function AccelRead(state: AccelerometerState, Range: ScaleRange): number {
@@ -809,24 +862,24 @@ namespace petal {
             accelFlag = false;
         }
 
-        let value = 0;
+        let data = AccelReadData();
+
+        data.ax -= accelBias3.x
+        data.ay -= accelBias3.y
+        data.az -= accelBias3.z
+
+        // 加速度计：1 LSB = (1000 mg) / (灵敏度 LSB/g)
+        let accelScale = (scaleFactor * 1000.0) / 32768; // mg/LSB
+
         switch (state) {
             case AccelerometerState.Y:
-                value = read16(0x28); // OUT_X_L and OUT_X_H
-                break;
+                return Math.round(data.ax * accelScale);
             case AccelerometerState.X:
-                value = read16(0x2A); // OUT_Y_L and OUT_Y_H
-                break;
+                return Math.round(data.ay * accelScale);
             case AccelerometerState.Z:
-                value = read16(0x2C); // OUT_Z_L and OUT_Z_H
-                break;
+                return Math.round(data.az * accelScale);
+            default:
+                return 0;
         }
-        // 将原始数据转换为g-force
-        let gForce = value / scaleFactor;
-
-        // 将g-force转换为mg
-        let mgForce = gForce * 1000;
-
-        return Math.round(mgForce);
     }
 }
