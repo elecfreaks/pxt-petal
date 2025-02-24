@@ -78,6 +78,35 @@ namespace petal {
         Range_8G = 8
     }
 
+    export enum AccelScale6 {
+        //% block="(±2g)"
+        Range_2G = 2,
+        //% block="(±4g)"
+        Range_4G = 4,
+        //% block="(±8g)"
+        Range_8G = 8,
+        //% block="(±16g)"
+        Range_16G = 16
+    }
+    export enum GyroRange6 {
+        //% block="±512(°/s)"
+        Range512dps = 512,
+        //% block="±16(°/s)"
+        Range16dps = 16,
+        //% block="±32(°/s)"
+        Range32dps = 32,
+        //% block="±64(°/s)"
+        Range64dps = 64,
+        //% block="±128(°/s)"
+        Range128dps = 128,
+        //% block="±256(°/s)"
+        Range256dps = 256,
+        //% block="±1024(°/s)"
+        Range1024dps = 1024,
+        //% block="±2048(°/s)"
+        Range2048dps = 2048
+    }
+
     export function portToAnalogPin(port: AnalogPort): any {
         let pin = AnalogPin.P1
         switch (port) {
@@ -195,7 +224,7 @@ namespace petal {
     //% color=#EA5532 weight=85 group="Digital"
     //% parts="headphone"
     //% useEnumVal=1
-    export function buzzerWrite(port: DigitalPort, Note:number): void {
+    export function buzzerWrite(port: DigitalPort, Note: number): void {
         let pin = portToDigitalPin(port);
         pins.setAudioPin(pin)
         music.ringTone(Note)
@@ -204,7 +233,7 @@ namespace petal {
     //% block="Stop buzzer on %port"
     //% color=#EA5532 weight=84 group="Digital"
     export function stopBuzzer(port: DigitalPort): void {
-        buzzerWrite(port,0);
+        buzzerWrite(port, 0);
     }
 
     //% blockId="trimpot" block="Trimpot sensor %port analog value"
@@ -216,11 +245,9 @@ namespace petal {
             voltage = voltage + pins.analogReadPin(pin)
         }
         voltage = voltage / 20
-        if (voltage <= 3)
-        {
+        if (voltage <= 3) {
             voltage = 3
-        } else if (voltage >= 1015)
-        {
+        } else if (voltage >= 1015) {
             voltage = 1015
         }
         return Math.round(Math.map(voltage, 3, 1015, 0, 1023))
@@ -517,17 +544,42 @@ namespace petal {
 
     let _6AxisImuFlag = true;
 
+    let currentAccelRange = 2; // 默认±2g
+    let currentGyroRange = 512; // 默认±512dps
 
-    function initSensor() {
-        writeRegister(REG_SELFTEST, 0xA2);
-        basic.pause(1750); // 自检等待时间
+    function initSensor(RangeA: number, RangeG: number) {
+        writeRegister(REG_SELFTEST, 0xA2);  // 启动自检
+        basic.pause(1750);                  // 等待自检完成
+        writeRegister(REG_SELFTEST, 0x00);  // 退出自检模式（部分传感器需要此操作）
+        basic.pause(100)
+        writeRegister(REG_I2C_CONFIG, 0x60);    // 重新配置I2C
+        basic.pause(100)
+        let regValue = 0x00;
+        switch (RangeA) {
+            case 2: regValue = 0x00; break;
+            case 4: regValue = 0x10; break;
+            case 8: regValue = 0x20; break;
+            case 16: regValue = 0x30; break;
+        }
+        writeRegister(REG_ACCEL_CONFIG, regValue);
+        regValue = 0x00;
+        switch (RangeG) {
+            case 16: regValue = 0x00; break; // ±16dps (000)
+            case 32: regValue = 0x20; break; // ±32dps (001 << 4)
+            case 64: regValue = 0x40; break; // ±64dps (010 << 4)
+            case 128: regValue = 0x60; break; // ±128dps (011 << 4)
+            case 256: regValue = 0x80; break; // ±256dps (100 << 4)
+            case 512: regValue = 0xA0; break; // ±512dps (101 << 4)
+            case 1024: regValue = 0xC0; break; // ±1024dps (110 << 4)
+            case 2048: regValue = 0xE0; break; // ±2048dps (111 << 4)
+        }
+        regValue |= 0x04;
+        writeRegister(REG_GYRO_CONFIG, regValue);
 
-        writeRegister(REG_I2C_CONFIG, 0x60);
-        writeRegister(REG_ACCEL_CONFIG, 0x00); // ±2g, 100Hz ODR
-        writeRegister(REG_GYRO_CONFIG, 0x54);  // ±250°/s, 100Hz ODR
-        writeRegister(REG_FILTER_CONFIG, 0x01);
-        writeRegister(REG_POWER_CONFIG, 0x03);
+        writeRegister(REG_FILTER_CONFIG, 0x01); // 低通滤波器配置
+        writeRegister(REG_POWER_CONFIG, 0x03);  // 电源管理模式
     }
+
 
     function dataAvailable(): boolean {
         let status = readRegister(REG_STATUS);
@@ -560,11 +612,13 @@ namespace petal {
     }
 
 
-    //% blockId="_6AxisImu" block="six AxisImu sensor read %state value"
+    //% blockId="_6AxisImu" block="six AxisImu sensor read %state value %rangeA %RangeG"
     //% color=#00B1ED weight=10 group="IIC"
-    export function _6AxisImuRead(state: _6AxisState): number {
+    export function _6AxisImuRead(state: _6AxisState, RangeA: AccelScale6, RangeG:GyroRange6): number {
         if (_6AxisImuFlag == true) {
-            initSensor();
+            currentAccelRange = RangeA;
+            currentGyroRange = RangeG;
+            initSensor(RangeA, RangeG);
             _6AxisImuFlag = false;
         }
 
@@ -575,20 +629,26 @@ namespace petal {
 
         let data = readData();
 
+        // 加速度计：1 LSB = (1000 mg) / (灵敏度 LSB/g)
+        let accelScale = (currentAccelRange * 1000.0) / 32768; // mg/LSB
+
+        // 陀螺仪：1 LSB = (量程 dps) / 32768 LSB
+        let gyroScale = currentGyroRange / 32768.0; // dps/LSB
+
         //结果保留两位小数
         switch (state) {
             case _6AxisState.AY:
-                return Math.round(data.ax * 0.061035);
+                return 0 - Math.round(data.ax * accelScale);
             case _6AxisState.AX:
-                return Math.round(data.ay * 0.061035);
+                return 0 - Math.round(data.ay * accelScale);
             case _6AxisState.AZ:
-                return Math.round(data.az * 0.061035);
+                return Math.round(data.az * accelScale);
             case _6AxisState.GY:
-                return Math.round(data.gx * 0.0076294);
+                return 0 - Math.round(data.gx * gyroScale);
             case _6AxisState.GX:
-                return Math.round(data.gy * 0.0076294);
+                return 0 - Math.round(data.gy * gyroScale);
             case _6AxisState.GZ:
-                return Math.round(data.gz * 0.0076294);
+                return Math.round(data.gz * gyroScale);
             case _6AxisState._6Temperature:
                 return Math.round(data.temperature * 10) / 10;
             default:
