@@ -57,7 +57,7 @@
   "petal.vibratorMotorWrite|block": "振动马达传感器 %port %state",
   "petal.petalTempRHRead|block": "温湿度传感器 %state 值",
   "petal.optoelectronicRead|block": "光电传感器 %port 检测到遮挡",
-  "petal.dlightRead|block": "光敏传感器光值(lux)",
+  "petal.dlightRead|block": "光敏传感器光强度(lux)",
   "petal.hbtRead|block": "人体温度传感器读取温度值",
   "petal.Ds18b20Temp|block": "DS18B20 温度传感器 %port 读取 %state 值",
   "petal._6AxisImuWrite|block": "六轴IMU传感器校准(静止3秒)",
