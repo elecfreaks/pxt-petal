@@ -274,22 +274,18 @@ namespace petal {
         let pin = portToAnalogPin(port);
         let voltage = 0;
 
-        // 定义ADC-LUX映射表（必须升序排列）
         const adc = [6, 9, 14, 22, 46, 171, 200, 270, 302, 417, 834, 954, 966, 976, 986];
         const lux = [5, 8, 12, 16, 23, 113, 142, 195, 244, 329, 771, 1255, 3835, 11783, 41489];
 
-        // 采样并平均
         for (let index = 0; index < 100; index++) {
             basic.pause(1);
             voltage += pins.analogReadPin(pin);
         }
         const adcValue = Math.round(voltage / 100);
 
-        // 边界处理
         if (adcValue <= adc[0]) return (adcValue - 1) < 0 ? 0: (adcValue - 1);
         if (adcValue >= adc[adc.length - 1]) return Math.round(Math.map(adcValue,986,1023,41489,100000));
 
-        // 分段线性映射
         for (let i = 0; i < adc.length - 1; i++) {
             if (adcValue >= adc[i] && adcValue <= adc[i + 1]) {
                 const ratio = (adcValue - adc[i]) / (adc[i + 1] - adc[i]);
@@ -297,7 +293,7 @@ namespace petal {
             }
         }
 
-        return 0; // 理论上不会执行到这里
+        return 0;
     }
 
     // export function photocellRead(port: AnalogPort): number {
