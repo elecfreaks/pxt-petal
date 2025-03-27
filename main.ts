@@ -28,6 +28,15 @@ namespace petal {
         Off
     }
 
+    export enum Distance_Unit_List {
+        //% block="mm" 
+        Distance_Unit_mm,
+        //% block="cm" 
+        Distance_Unit_cm,
+        //% block="foot"
+        Distance_Unit_foot,
+    }
+
     export enum TempAndRh {
         //% block="Temperature(℃)"
         Temperature,
@@ -283,8 +292,8 @@ namespace petal {
         }
         const adcValue = Math.round(voltage / 100);
 
-        if (adcValue <= adc[0]) return (adcValue - 1) < 0 ? 0: (adcValue - 1);
-        if (adcValue >= adc[adc.length - 1]) return Math.round(Math.map(adcValue,986,1023,41489,100000));
+        if (adcValue <= adc[0]) return (adcValue - 1) < 0 ? 0 : (adcValue - 1);
+        if (adcValue >= adc[adc.length - 1]) return Math.round(Math.map(adcValue, 986, 1023, 41489, 100000));
 
         for (let i = 0; i < adc.length - 1; i++) {
             if (adcValue >= adc[i] && adcValue <= adc[i + 1]) {
@@ -352,6 +361,25 @@ namespace petal {
         return Math.round(UVlevel)
     }
 
+    //% blockId="waterLevelRead" block="Water level sensor %Rjpin value(0~100)"
+    //% color=#E2C438 weight=28 group="Analog"
+    export function waterLevelRead(port: AnalogPort): number {
+        let pin = portToAnalogPin(port)
+        let voltage = 0, waterlevel = 0;
+        voltage = pins.map(
+            pins.analogReadPin(pin),
+            50,
+            600,
+            0,
+            100
+        );
+        if (voltage < 0) {
+            voltage = 0
+        }
+        waterlevel = voltage;
+        return Math.round(waterlevel)
+    }
+
     //% blockId=vibrationDetection block="Vibration detection sensor %port vibration detected"
     //% color=#EA5532 weight=75 group="Digital"
     export function vibrationDetectionRead(port: DigitalPort): boolean {
@@ -379,6 +407,54 @@ namespace petal {
             case SwitchState.Off:
                 pins.digitalWritePin(pin, 0)
                 break;
+        }
+    }
+
+    //% blockId="fanWrite" block="Fan sensor %port %state"
+    //% color=#EA5532 weight=63 group="Digital"
+    export function FanWrite(port: DigitalPort, state: SwitchState): void {
+        let pin = portToDigitalPin(port)
+        switch (state) {
+            case SwitchState.Open:
+                pins.digitalWritePin(pin, 1)
+                break;
+            case SwitchState.Off:
+                pins.digitalWritePin(pin, 0)
+                break;
+        }
+    }
+
+    //% blockId=sonarbit block="Ultrasonic sensor %port distance %distance_unit"
+    //% color=#EA5532 weight=58 group="Digital"
+    export function ultrasoundSensor(port: DigitalPort, distance_unit: Distance_Unit_List): number {
+        let pin = portToDigitalPin(port)
+        pins.setPull(pin, PinPullMode.PullNone)
+        pins.digitalWritePin(pin, 0)
+        control.waitMicros(2)
+        pins.digitalWritePin(pin, 1)
+        control.waitMicros(10)
+        pins.digitalWritePin(pin, 0)
+
+        // read pulse
+        let d = pins.pulseIn(pin, PulseValue.High, 23000)  // 8 / 340 = 
+        // let distance = d * 10 * 5 / 3 / 58
+        // let distance = d * 10 / 58 //d * 34 / 2 / 100
+        let distance = d * 34 / 2 / 100
+
+        if (distance > 4000) distance = 0
+
+        switch (distance_unit) {
+            case 0:
+                return Math.round(distance) //mm
+                break
+            case 1:
+                return Math.round(distance / 10)  //cm
+                break
+            case 2:
+                return Math.round(distance / 25.4)  //inch
+                break
+            default:
+                return 0
         }
     }
 
