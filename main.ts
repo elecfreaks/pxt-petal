@@ -205,7 +205,7 @@ namespace petal {
     //% blockId=set_bpm_block
     //% block="set rhythm %bpm bpm"
     //% bpm.min=40 bpm.max=500 bpm.defl=120
-    //% color=#EA5532 weight=87 group="Digital"
+    //% color=#EA5532 weight=70 group="Digital"
     export function setBPM(bpm: number): void {
         currentBPM = Math.max(1, Math.min(500, bpm)); // 限制范围1-500
     }
@@ -213,7 +213,7 @@ namespace petal {
     //% block="Buzzer sensor %port play ring tone |%note=device_note %beat rhythm %mode"
     //% beat.defl=BeatFraction.Whole
     //% mode.defl=PlaybackMode.UntilDone
-    //% color=#EA5532 weight=86 group="Digital"
+    //% color=#EA5532 weight=60 group="Digital"
     //% inlineInputMode=inline
     //% help=music/ring-tone
     //% parts="headphone"
@@ -230,9 +230,9 @@ namespace petal {
     }
 
 
-    //% blockId=buzzer block="Buzzer sensor %port play ring tone (Hz)|%note=device_note" blockGap=8
+    //% blockId=buzzer block="Buzzer sensor %port play ring tone (Hz)|%note=device_note"
     //% help=music/ring-tone
-    //% color=#EA5532 weight=85 group="Digital"
+    //% color=#EA5532 weight=65 group="Digital"
     //% parts="headphone"
     //% useEnumVal=1
     export function buzzerWrite(port: DigitalPort, Note: number): void {
@@ -242,7 +242,7 @@ namespace petal {
     }
 
     //% block="Stop buzzer on %port"
-    //% color=#EA5532 weight=84 group="Digital"
+    //% color=#EA5532 weight=75 group="Digital"
     export function stopBuzzer(port: DigitalPort): void {
         buzzerWrite(port, 0);
     }
@@ -330,7 +330,7 @@ namespace petal {
     // }
 
     //% blockId="redled" block="Red led sensor %port %state"
-    //% color=#EA5532 weight=80 group="Digital"
+    //% color=#EA5532 weight=83 group="Digital"
     export function redLedWrite(port: DigitalPort, state: SwitchState): void {
         let pin = portToDigitalPin(port)
         switch (state) {
@@ -381,7 +381,7 @@ namespace petal {
     }
 
     //% blockId=vibrationDetection block="Vibration detection sensor %port vibration detected"
-    //% color=#EA5532 weight=75 group="Digital"
+    //% color=#EA5532 weight=88 group="Digital"
     export function vibrationDetectionRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
         pins.setPull(pin, PinPullMode.PullUp)
@@ -389,7 +389,7 @@ namespace petal {
     }
 
     //% blockId=tilt block="Tilt sensor %port Tilt lift detected"
-    //% color=#EA5532 weight=70 group="Digital"
+    //% color=#EA5532 weight=84 group="Digital"
     export function tiltRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
         pins.setPull(pin, PinPullMode.PullUp)
@@ -397,7 +397,7 @@ namespace petal {
     }
 
     //% blockId="vibratorMotor" block="Vibrator motor sensor %port %state"
-    //% color=#EA5532 weight=65 group="Digital"
+    //% color=#EA5532 weight=81 group="Digital"
     export function vibratorMotorWrite(port: DigitalPort, state: SwitchState): void {
         let pin = portToDigitalPin(port)
         switch (state) {
@@ -411,7 +411,7 @@ namespace petal {
     }
 
     //% blockId="fanWrite" block="Fan sensor %port %state"
-    //% color=#EA5532 weight=63 group="Digital"
+    //% color=#EA5532 weight=82 group="Digital"
     export function FanWrite(port: DigitalPort, state: SwitchState): void {
         let pin = portToDigitalPin(port)
         switch (state) {
@@ -514,7 +514,7 @@ namespace petal {
 
 
     //% blockId=optoelectronic block="Optoelectronic sensor %port Obstruction detected"
-    //% color=#EA5532 weight=60 group="Digital"
+    //% color=#EA5532 weight=93 group="Digital"
     export function optoelectronicRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
         pins.setPull(pin, PinPullMode.PullUp)
