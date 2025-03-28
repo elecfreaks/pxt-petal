@@ -1,0 +1,26 @@
+{
+    "name": "pxt-petal",
+    "version": "0.0.0",
+    "description": "",
+    "dependencies": {
+        "core": "*",
+        "radio": "*",
+        "microphone": "*"
+    },
+    "files": [
+        "README.md",
+        "main.ts",
+        "display.ts",
+        "_locales/zh-CN/pxt-petal-strings.json",
+        "_locales/zh-CN/pxt-petal-jsdoc-strings.json"
+    ],
+    "public": true,
+    "targetVersions": {
+        "target": "7.0.57",
+        "targetId": "microbit"
+    },
+    "supportedTargets": [
+        "microbit"
+    ],
+    "preferredEditor": "tsprj"
+}
