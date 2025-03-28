@@ -10,13 +10,16 @@
 * 点击齿轮图标菜单下的 **扩展**
 * 搜索 **https://github.com/zy2516/pxt-petal** 并导入
 
-## 编辑此项目
+## Code Example
+```JavaScript
 
-在 MakeCode 中编辑此仓库。
-
-* 打开 [https://makecode.microbit.org/](https://makecode.microbit.org/)
-* 点击 **导入**，然后点击 **导入 URL**
-* 粘贴 **https://github.com/zy2516/pxt-petal** 并点击导入
+basic.forever(function () {
+    PlanetX.showUserText(1, "Temp:" + PlanetX.octopus_BME280(PlanetX.BME280_state.BME280_temperature_C))
+    PlanetX.showUserText(2, "Distance:" + PlanetX.Ultrasoundsensor(PlanetX.DigitalRJPin.J1, PlanetX.Distance_Unit_List.Distance_Unit_cm))
+    if (PlanetX.buttonAB(PlanetX.DigitalRJPin.J1, PlanetX.ButtonStateList.A)) {
+        PlanetX.motorfan(PlanetX.AnalogRJPin.J1, true, 80)
+    }
+})
 
 #### 元数据（用于搜索、渲染）
 
