@@ -20,6 +20,7 @@ basic.forever(function () {
         PlanetX.motorfan(PlanetX.AnalogRJPin.J1, true, 80)
     }
 })
+```
 
 #### 元数据（用于搜索、渲染）
 
