@@ -1,4 +1,5 @@
 # Petal Package
+![](/Petal.png/)
 
 This extension is designed to program and drive the sensor series Petal (Flower Petal) micro:bit expansion sensors. To purchase the Petal, visit the [Elecfreaks Official Store](https://www.elecfreaks.com/).
 

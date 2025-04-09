@@ -13,6 +13,9 @@
         "_locales/zh-CN/pxt-petal-strings.json",
         "_locales/zh-CN/pxt-petal-jsdoc-strings.json"
     ],
+    "testFiles": [
+        "test.ts"
+    ],
     "public": true,
     "targetVersions": {
         "target": "7.0.57",
