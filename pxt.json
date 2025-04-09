@@ -10,9 +10,11 @@
     "files": [
         "README.md",
         "main.ts",
-        "display.ts",
         "_locales/zh-CN/pxt-petal-strings.json",
         "_locales/zh-CN/pxt-petal-jsdoc-strings.json"
+    ],
+    "testFiles": [
+        "test.ts"
     ],
     "public": true,
     "targetVersions": {

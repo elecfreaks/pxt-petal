@@ -1,24 +1,43 @@
+# Petal Package
+![](/Petal.png/)
 
-> 在 [https://zy2516.github.io/pxt-petal/](https://zy2516.github.io/pxt-text/) 打开此页面
+This extension is designed to program and drive the sensor series Petal (Flower Petal) micro:bit expansion sensors. To purchase the Petal, visit the [Elecfreaks Official Store](https://www.elecfreaks.com/).
 
-## 用作扩展
+## Key Features
+- **Color Recognition System:** An intuitive system using color-coded terminals simplifies sensor and port connections.
 
-此仓库可以作为 **插件** 添加到 MakeCode 中。
+## Getting Started
 
-* 打开 [https://makecode.microbit.org/](https://makecode.microbit.org/)
-* 点击 **新项目**
-* 点击齿轮图标菜单下的 **扩展**
-* 搜索 **https://github.com/zy2516/pxt-petal** 并导入
+### Installing the Extension
 
-## 编辑此项目
+1. Launch MakeCode editor and click the "Extensions" icon.
+2. Search for "Petal" or paste the link "https://github.com/elecfreaks/pxt-petal" to download and install the extension.
 
-在 MakeCode 中编辑此仓库。
+### Basic Examples
 
-* 打开 [https://makecode.microbit.org/](https://makecode.microbit.org/)
-* 点击 **导入**，然后点击 **导入 URL**
-* 粘贴 **https://github.com/zy2516/pxt-petal** 并点击导入
+**Block Editor Example**
 
-#### 元数据（用于搜索、渲染）
+1. Drag the "forever" block into the script area.
+2. Inside it, insert a "if...else..." logic control block.
+3. In the condition part, insert the "Petal - buttonRead" block.
+4. If the button is pressed, make the micro:bit display the pattern "Yes", otherwise display the pattern "No".
 
-* for PXT/microbit
-<script src="https://makecode.com/gh-pages-embed.js"></script><script>makeCodeRender("{{ site.makecode.home_url }}", "{{ site.github.owner_name }}/{{ site.github.repository_name }}");</script>
+**JavaScript Example**
+
+```JavaScript
+basic.forever(function () {
+    if (petal.buttonRead(petal.DigitalPort.J1)) {
+        basic.showIcon(IconNames.Yes)
+    } else {
+        basic.showIcon(IconNames.No)
+    }
+})
+```
+
+## Supported Targets
+
+- PXT/micro:bit
+
+## License
+
+This extension is licensed under the MIT License.
