@@ -21,6 +21,7 @@ namespace petal {
         J2
     }
 
+    
     export function portToAnalogPin(port: AnalogPort): any {
         let pin = AnalogPin.P1
         switch (port) {
