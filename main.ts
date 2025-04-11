@@ -37,6 +37,22 @@ namespace petal {
         Distance_Unit_foot,
     }
 
+    export enum Sever_Type {
+        //% block="180°" 
+        S180 = 180,
+        //% block="270°"
+        S270 = 270,
+        //% block="360°"
+        S360 = 360,
+    }
+
+    export enum Sever_List {
+        //% block="S1" 
+        S1,
+        //% block="S2"
+        S2,
+    }
+
     export enum TempAndRh {
         //% block="Temperature(℃)"
         Temperature,
@@ -68,7 +84,6 @@ namespace petal {
         //% block="temperature(℃)"
         _6Temperature
     }
-    
 
     export enum AccelerometerState {
         //% block="X(mg)"
@@ -146,6 +161,25 @@ namespace petal {
                 break;
             case DigitalPort.J4:
                 pin = DigitalPin.P15
+                break;
+        }
+        return pin
+    }
+
+    export function portToDigitalPin2(port: DigitalPort): any {
+        let pin = DigitalPin.P8
+        switch (port) {
+            case DigitalPort.J1:
+                pin = DigitalPin.P8
+                break;
+            case DigitalPort.J2:
+                pin = DigitalPin.P12
+                break;
+            case DigitalPort.J3:
+                pin = DigitalPin.P14
+                break;
+            case DigitalPort.J4:
+                pin = DigitalPin.P16
                 break;
         }
         return pin
@@ -265,17 +299,117 @@ namespace petal {
         return Math.round(Math.map(voltage, 3, 1015, 0, 1023))
     }
 
-    //% blockId="noise" block="Noise sensor %port analog value"
+    //% blockId="noise" block="Noise sensor %port value (dB)"
     //% color=#E2C438 weight=35 group="Analog"
     export function noiseRead(port: AnalogPort): number {
         let pin = portToAnalogPin(port)
-        let voltage = 0
-        for (let index = 0; index < 100; index++) {
-            basic.pause(1)
-            voltage = voltage + pins.analogReadPin(pin)
+        let level = 0, voltage = 0, noise = 0, h = 0, l = 0, sumh = 0, suml = 0
+        for (let i = 0; i < 1000; i++) {
+            level = level + pins.analogReadPin(pin)
         }
-        voltage = voltage / 100
-        return voltage
+        level = level / 1000
+        for (let i = 0; i < 1000; i++) {
+            voltage = pins.analogReadPin(pin)
+            if (voltage >= level) {
+                h += 1
+                sumh = sumh + voltage
+            } else {
+                l += 1
+                suml = suml + voltage
+            }
+        }
+        if (h == 0) {
+            sumh = level
+        } else {
+            sumh = sumh / h
+        }
+        if (l == 0) {
+            suml = level
+        } else {
+            suml = suml / l
+        }
+        noise = sumh - suml
+        if (noise <= 4) {
+            noise = pins.map(
+                noise,
+                0,
+                4,
+                30,
+                50
+            )
+        } else if (noise <= 8) {
+            noise = pins.map(
+                noise,
+                4,
+                8,
+                50,
+                55
+            )
+        } else if (noise <= 14) {
+            noise = pins.map(
+                noise,
+                9,
+                14,
+                55,
+                60
+            )
+        } else if (noise <= 32) {
+            noise = pins.map(
+                noise,
+                15,
+                32,
+                60,
+                70
+            )
+        } else if (noise <= 60) {
+            noise = pins.map(
+                noise,
+                33,
+                60,
+                70,
+                75
+            )
+        } else if (noise <= 100) {
+            noise = pins.map(
+                noise,
+                61,
+                100,
+                75,
+                80
+            )
+        } else if (noise <= 150) {
+            noise = pins.map(
+                noise,
+                101,
+                150,
+                80,
+                85
+            )
+        } else if (noise <= 231) {
+            noise = pins.map(
+                noise,
+                151,
+                231,
+                85,
+                90
+            )
+        } else {
+            noise = pins.map(
+                noise,
+                231,
+                1023,
+                90,
+                120
+            )
+        }
+        noise = Math.round(noise)
+        return Math.round(noise)
+        // for (let index = 0; index < 100; index++) {
+        //     basic.pause(1)
+        //     voltage = voltage + pins.analogReadPin(pin)
+        // }
+        // voltage = voltage / 100
+        // return voltage
     }
 
     //% blockId="photocell" block="Photocell sensor %port light intensity(lux)"
@@ -367,16 +501,21 @@ namespace petal {
     export function waterLevelRead(port: AnalogPort): number {
         let pin = portToAnalogPin(port)
         let voltage = 0, waterlevel = 0;
-        voltage = pins.map(
-            pins.analogReadPin(pin),
-            50,
-            600,
-            0,
-            100
-        );
-        if (voltage < 0) {
-            voltage = 0
+        let value = 0
+        for (let index = 0; index < 100; index++) {
+            basic.pause(1);
+            value += pins.analogReadPin(pin);
         }
+        value = Math.round(voltage / 100);
+        if (value <= 380)
+        {
+            voltage = pins.map(pins.analogReadPin(pin), 50,380,0,60);
+        }
+        else
+        {
+            voltage = pins.map(pins.analogReadPin(pin), 381, 500, 60, 100);
+        }
+        voltage = Math.min(100,Math.max(voltage,0))
         waterlevel = voltage;
         return Math.round(waterlevel)
     }
@@ -387,6 +526,52 @@ namespace petal {
         let pin = portToDigitalPin(port)
         pins.setPull(pin, PinPullMode.PullUp)
         return pins.digitalReadPin(pin) == 0
+    }
+
+    //% block="set %severtype servo %severlist on %port to angle %angle"
+    //% angle.min=0 angle.max=180
+    //% color=#EA5532 weight=86 group="Digital"
+    //% inlineInputMode=inline
+    export function setSeverAngle(severtype: Sever_Type, severlist: Sever_List, port: DigitalPort, angle: number): void {
+        let pin = portToDigitalPin(port)
+        switch (severlist) {
+            case Sever_List.S1:
+                pin = portToDigitalPin(port)
+                break;
+            case Sever_List.S2:
+                pin = portToDigitalPin2(port)
+                break;
+        }
+        angle = Math.clamp(0, severtype , angle);
+
+        // 将角度转换为微秒脉冲宽度 (通常舵机范围为 500us 到 2500us)
+        let pulseWidth = 500 + (angle / severtype) * 2000;
+
+        // 设置 PWM 输出，频率为 50Hz (周期 20ms)
+        pins.servoSetPulse(pin, pulseWidth);
+    }
+
+    //% block="set continuous servo %severlist on %port speed to %speed\\%"
+    //% speed.min=-100 speed.max=100
+    //% color=#EA5532 weight=87 group="Digital"
+    //% inlineInputMode=inline
+    export function setSeverSpeed(severlist: Sever_List, port: DigitalPort, speed: number): void {
+        let pin = portToDigitalPin(port)
+        switch (severlist) {
+            case Sever_List.S1:
+                pin = portToDigitalPin(port)
+                break;
+            case Sever_List.S2:
+                pin = portToDigitalPin2(port)
+                break;
+        }
+        speed = Math.clamp(-100, 100, speed);
+        speed = Math.round(Math.map(speed,-100,100,0,180))
+        // 将角度转换为微秒脉冲宽度 (通常舵机范围为 500us 到 2500us)
+        let pulseWidth = 500 + (speed / 180) * 2000;
+
+        // 设置 PWM 输出，频率为 50Hz (周期 20ms)
+        pins.servoSetPulse(pin, pulseWidth);
     }
 
     //% blockId=tilt block="Tilt sensor %port Tilt lift detected"
@@ -411,16 +596,19 @@ namespace petal {
         }
     }
 
-    //% blockId="fanWrite" block="Fan sensor %port %state"
+    //% blockId="fanWrite" block="Motor fan sensor %port %state  || speed %speed \\%"
+    //% speed.min=0 speed.max=100 speed.defl=50
     //% color=#EA5532 weight=82 group="Digital"
-    export function FanWrite(port: DigitalPort, state: SwitchState): void {
+    export function FanWrite(port: DigitalPort, state: SwitchState, speed: number = 100): void {
         let pin = portToDigitalPin(port)
         switch (state) {
             case SwitchState.Open:
-                pins.digitalWritePin(pin, 1)
+                pins.analogSetPeriod(pin, 100)
+                pins.analogWritePin(pin, Math.map(speed, 0, 100, 0, 1023))
                 break;
             case SwitchState.Off:
-                pins.digitalWritePin(pin, 0)
+                pins.analogWritePin(pin, 0)
+                speed = 0
                 break;
         }
     }
