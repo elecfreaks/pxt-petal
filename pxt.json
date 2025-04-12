@@ -5,8 +5,7 @@
     "dependencies": {
         "core": "*",
         "radio": "*",
-        "microphone": "*",
-        "pxt-oled-ssd1306": "github:tinkertanker/pxt-oled-ssd1306#v2.0.17"
+        "microphone": "*"
     },
     "files": [
         "README.md",
