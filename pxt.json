@@ -6,7 +6,7 @@
         "core": "*",
         "radio": "*",
         "microphone": "*",
-        "pxt-oled-ssd1306": "https://github.com/tinkertanker/pxt-oled-ssd1306#v2.0.17"
+        "pxt-oled-ssd1306": "github:tinkertanker/pxt-oled-ssd1306#v2.0.17"
     },
     "files": [
         "README.md",
