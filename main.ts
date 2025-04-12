@@ -507,15 +507,13 @@ namespace petal {
             value += pins.analogReadPin(pin);
         }
         value = Math.round(voltage / 100);
-        if (value <= 380)
-        {
-            voltage = pins.map(pins.analogReadPin(pin), 50,380,0,60);
+        if (value <= 380) {
+            voltage = pins.map(pins.analogReadPin(pin), 50, 380, 0, 60);
         }
-        else
-        {
+        else {
             voltage = pins.map(pins.analogReadPin(pin), 381, 500, 60, 100);
         }
-        voltage = Math.min(100,Math.max(voltage,0))
+        voltage = Math.min(100, Math.max(voltage, 0))
         waterlevel = voltage;
         return Math.round(waterlevel)
     }
@@ -528,11 +526,11 @@ namespace petal {
         return pins.digitalReadPin(pin) == 0
     }
 
-    //% block="set %severtype servo %severlist on %port to angle %angle"
+    //% block="set %severtype servo  on %port %severlist to angle %angle"
     //% angle.min=0 angle.max=180
     //% color=#EA5532 weight=86 group="Digital"
     //% inlineInputMode=inline
-    export function setSeverAngle(severtype: Sever_Type, severlist: Sever_List, port: DigitalPort, angle: number): void {
+    export function setSeverAngle(severtype: Sever_Type, port: DigitalPort, severlist: Sever_List, angle: number): void {
         let pin = portToDigitalPin(port)
         switch (severlist) {
             case Sever_List.S1:
@@ -542,7 +540,7 @@ namespace petal {
                 pin = portToDigitalPin2(port)
                 break;
         }
-        angle = Math.clamp(0, severtype , angle);
+        angle = Math.clamp(0, severtype, angle);
 
         // 将角度转换为微秒脉冲宽度 (通常舵机范围为 500us 到 2500us)
         let pulseWidth = 500 + (angle / severtype) * 2000;
@@ -551,11 +549,11 @@ namespace petal {
         pins.servoSetPulse(pin, pulseWidth);
     }
 
-    //% block="set continuous servo %severlist on %port speed to %speed\\%"
+    //% block="set continuous servo on %port %severlist speed to %speed\\%"
     //% speed.min=-100 speed.max=100
     //% color=#EA5532 weight=87 group="Digital"
     //% inlineInputMode=inline
-    export function setSeverSpeed(severlist: Sever_List, port: DigitalPort, speed: number): void {
+    export function setSeverSpeed(port: DigitalPort, severlist: Sever_List, speed: number): void {
         let pin = portToDigitalPin(port)
         switch (severlist) {
             case Sever_List.S1:
@@ -566,7 +564,7 @@ namespace petal {
                 break;
         }
         speed = Math.clamp(-100, 100, speed);
-        speed = Math.round(Math.map(speed,-100,100,0,180))
+        speed = Math.round(Math.map(speed, -100, 100, 0, 180))
         // 将角度转换为微秒脉冲宽度 (通常舵机范围为 500us 到 2500us)
         let pulseWidth = 500 + (speed / 180) * 2000;
 
