@@ -68,6 +68,7 @@
   "petal.dlightRead|block": "光敏传感器光强度(lux)",
   "petal.hbtRead|block": "人体温度传感器读取温度值",
   "petal.Ds18b20Temp|block": "DS18B20 温度传感器 %port 读取 %state 值",
+  "petal.trackingSensor|block": "巡线传感器 %port 识别到 %state",
   "petal._6AxisImuWrite|block": "六轴IMU传感器校准(静止3秒)",
   "petal._6AxisImuRead|block": "六轴IMU传感器读取 %state 值 %rangeA %RangeG",
   "petal.AccelWrite|block": "加速度计传感器校准(静止3秒)",

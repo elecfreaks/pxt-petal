@@ -43,6 +43,7 @@
   "petal.dlightRead|block": "Dlight sensor light value",
   "petal.hbtRead|block": "Hbt sensor read temperature value",
   "petal.Ds18b20Temp|block": "ds18b20 sensor %port read %state value",
+  "petal.trackingSensor|block": "Line-tracking sensor %port is %state",
   "petal._6AxisImuRead|block": "six AxisImu sensor read %state value",
   "petal.AccelRead|block": "Accelerometer sensor read %state value %Range",
   "Petal_Display.DigitalPort.J1|block": "J1",

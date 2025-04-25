@@ -68,6 +68,20 @@ namespace petal {
         DS18B20_temperature_F
     }
 
+    export enum TrackingStateType {
+        //% block="● ●" enumval=0
+        Tracking_State_0,
+
+        //% block="● ◌" enumval=1
+        Tracking_State_1,
+
+        //% block="◌ ●" enumval=2
+        Tracking_State_2,
+
+        //% block="◌ ◌" enumval=3
+        Tracking_State_3
+    }
+
     export enum _6AxisState {
         //% block="AX(g)"
         AX,
@@ -822,6 +836,26 @@ namespace petal {
                 return 0
         }
 
+    }
+
+    //% blockId=tracking block="Line-tracking sensor %port is %state"
+    //% color=#EA5532 weight=54 group="Digital"
+    export function trackingSensor(port: DigitalPort, state: TrackingStateType): boolean {
+        let lpin = portToDigitalPin(port);
+        let rpin = portToDigitalPin2(port);
+        pins.setPull(lpin, PinPullMode.PullUp)
+        pins.setPull(rpin, PinPullMode.PullUp)
+        let lsensor = pins.digitalReadPin(lpin)
+        let rsensor = pins.digitalReadPin(rpin)
+        if (lsensor == 0 && rsensor == 0 && state == TrackingStateType.Tracking_State_0) {
+            return true;
+        } else if (lsensor == 0 && rsensor == 1 && state == TrackingStateType.Tracking_State_1) {
+            return true;
+        } else if (lsensor == 1 && rsensor == 0 && state == TrackingStateType.Tracking_State_2) {
+            return true;
+        } else if (lsensor == 1 && rsensor == 1 && state == TrackingStateType.Tracking_State_3) {
+            return true;
+        } else return false;
     }
     //6 Axis Imu Sensor
     let QMI8658A_I2C_ADDR = 0x6A;
