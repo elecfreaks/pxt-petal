@@ -52,6 +52,7 @@
   "petal.stopBuzzer|block": "蜂鸣器模块 %port 关闭",
   "petal.trimpotRead|block": "电位器 %port 模拟值",
   "petal.noiseRead|block": "噪声传感器 %port 响度（dB）",
+  "petal.soilHumidityRead|block": "土壤湿度传感器 %port 湿度值(0~100)",
   "petal.photocellRead|block": "光敏传感器 %port 光强度(lux)",
   "petal.redLedWrite|block": "LED模块 %port %state",
   "petal.uvLevelRead|block": "紫外线传感器 %Rjpin 级别(0~15)",

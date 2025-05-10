@@ -426,6 +426,23 @@ namespace petal {
         // return voltage
     }
 
+    //% blockId="readsoilmoisture" block="Soil moisture sensor %port value(0~100)"
+    //% color=#E2C438 weight=34 group="Analog"
+    export function soilHumidityRead(port: AnalogPort): number {
+        let voltage = 0, soilmoisture = 0;
+        let pin = AnalogPin.P1
+        pin = portToAnalogPin(port)
+        voltage = pins.map(
+            pins.analogReadPin(pin),
+            0,
+            1023,
+            0,
+            100
+        );
+        soilmoisture = 100 - voltage;
+        return Math.round(soilmoisture);
+    }
+
     //% blockId="photocell" block="Photocell sensor %port light intensity(lux)"
     //% color=#E2C438 weight=33 group="Analog"
     export function photocellRead(port: AnalogPort): number {
