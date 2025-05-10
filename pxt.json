@@ -6,7 +6,8 @@
         "core": "*",
         "radio": "*",
         "microphone": "*",
-        "pxt-oled-ssd1306": "github:tinkertanker/pxt-oled-ssd1306#v2.0.17"
+        "pxt-oled-ssd1306": "github:tinkertanker/pxt-oled-ssd1306#v2.0.17",
+        "ESP8266_IoT": "github:elecfreaks/pxt-esp8266iot#v2.2.9"
     },
     "files": [
         "README.md",
