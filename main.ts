@@ -434,13 +434,13 @@ namespace petal {
         pin = portToAnalogPin(port)
         voltage = pins.map(
             pins.analogReadPin(pin),
-            0,
-            1023,
+            550,
+            900,
             0,
             100
         );
         soilmoisture = 100 - voltage;
-        return Math.round(soilmoisture);
+        return Math.round(soilmoisture >= 100 ? 100 : soilmoisture <= 0 ? 0 : soilmoisture);
     }
 
     //% blockId="photocell" block="Photocell sensor %port light intensity(lux)"
