@@ -6,15 +6,15 @@
         "core": "*",
         "radio": "*",
         "microphone": "*",
-        "pxt-oled-ssd1306": "github:tinkertanker/pxt-oled-ssd1306#v2.0.17",
-        "ESP8266_IoT": "github:elecfreaks/pxt-esp8266iot#v2.2.9"
+        "pxt-oled-ssd1306": "github:tinkertanker/pxt-oled-ssd1306#v2.0.17"
     },
     "files": [
         "README.md",
         "main.ts",
         "display.ts",
         "_locales/zh-CN/pxt-petal-strings.json",
-        "_locales/zh-CN/pxt-petal-jsdoc-strings.json"
+        "_locales/zh-CN/pxt-petal-jsdoc-strings.json",
+        "esp8266.ts"
     ],
     "testFiles": [
         "test.ts"
