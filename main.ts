@@ -534,8 +534,7 @@ namespace petal {
         let voltage = 0, waterlevel = 0;
         let value = 0
         for (let index = 0; index < 100; index++) {
-            basic.pause(1);
-            value += pins.analogReadPin(pin);
+            voltage += pins.analogReadPin(pin);
         }
         value = Math.round(voltage / 100);
         if (value <= 380) {
