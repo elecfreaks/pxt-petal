@@ -53,7 +53,7 @@ namespace petal {
         return pin
     }
 
-    //% blockId=button block="Button sensor %port is pressed"
+    //% blockId=button block="button sensor %port is pressed"
     //% color=#EA5532 weight=100 group="Digital"
     export function buttonRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
@@ -61,7 +61,7 @@ namespace petal {
         return pins.digitalReadPin(pin) == 0
     }
 
-    //% blockId=hall block="Hall sensor %port is attracted"
+    //% blockId=hall block="hall sensor %port is attracted"
     //% color=#EA5532 weight=95 group="Digital"
     export function hallRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
