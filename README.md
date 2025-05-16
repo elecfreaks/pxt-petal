@@ -35,7 +35,7 @@ basic.forever(function () {
 ```
 ## Advanced Applications
 
-Delve into advanced functionalities like motor speed regulation and sensor data retrieval. For detailed examples and instructions, visit our [online tutorials](https://wiki.elecfreaks.com/en/microbit/patel-series/#).Q
+Explore advanced features such as in-depth sensor data retrieval. For detailed examples and explanations, please visit our [online tutorials](https://wiki.elecfreaks.com/en/microbit/patel-series/#).
 
 ## Supported Targets
 
