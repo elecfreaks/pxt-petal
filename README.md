@@ -1,7 +1,7 @@
 # Petal Package
 ![](/Petal.png/)
 
-This extension is designed to program and drive the sensor series Petal (Flower Petal) micro:bit expansion sensors. To purchase the Petal, visit the [Elecfreaks Official Store](https://www.elecfreaks.com/).
+This extension is designed to program and drive the sensor series Petal (Flower Petal) micro:bit expansion sensors. To purchase the Petal, visit the [Elecfreaks Official Store](https://shop.elecfreaks.com/products/elecfreaks-petal-button-sensor).
 
 ## Key Features
 - **Color Recognition System:** An intuitive system using color-coded terminals simplifies sensor and port connections.
@@ -33,6 +33,9 @@ basic.forever(function () {
     }
 })
 ```
+## Advanced Applications
+
+Delve into advanced functionalities like motor speed regulation and sensor data retrieval. For detailed examples and instructions, visit our [online tutorials](https://wiki.elecfreaks.com/en/microbit/patel-series/#).Q
 
 ## Supported Targets
 
