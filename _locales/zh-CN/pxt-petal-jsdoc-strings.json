@@ -1,5 +1,5 @@
 {
-  "petal.buttonRead": "Button Read",
-  "petal.hallRead": "hallRead",
-  "petal.pirRead": "PIR Read"
+  "petal.buttonRead": "Get button state",
+  "petal.hallRead": "Detect magnetic field information",
+  "petal.pirRead": "Detect the human body"
 }
