@@ -53,6 +53,9 @@ namespace petal {
         return pin
     }
 
+    /**
+    * Get button state.
+    */
     //% blockId=petal_button block="button sensor %port is pressed"
     //% color=#EA5532 weight=100 group="Digital"
     export function buttonRead(port: DigitalPort): boolean {
@@ -61,6 +64,9 @@ namespace petal {
         return pins.digitalReadPin(pin) == 0
     }
 
+    /**
+    * Detect magnetic field information
+    */
     //% blockId=petal_hall block="Hall sensor %port is attracted"
     //% color=#EA5532 weight=95 group="Digital"
     export function hallRead(port: DigitalPort): boolean {
@@ -69,6 +75,9 @@ namespace petal {
         return pins.digitalReadPin(pin) == 0
     }
 
+    /**
+    * Detect the human body.
+    */
     //% blockId=petal_pir block="PIR sensor %port detects motion"
     //% color=#EA5532 weight=90 group="Digital"
     export function pirRead(port: DigitalPort): boolean {
