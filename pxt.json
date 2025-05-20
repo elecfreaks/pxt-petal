@@ -1,14 +1,14 @@
 {
     "name": "pxt-petal",
-    "version": "0.0.0",
+    "version": "1.0.0",
     "description": "The micro:bit new sensor series Petal(花瓣) with HY2.0 connection port by ELECFREAKS Co.ltd",
     "license": "MIT",
     "dependencies": {
-        "core": "*",
-        "microphone": "*"
+        "core": "*"
     },
     "files": [
         "README.md",
+        "basic.ts",
         "main.ts",
         "_locales/zh-CN/pxt-petal-strings.json",
         "_locales/zh-CN/pxt-petal-jsdoc-strings.json"

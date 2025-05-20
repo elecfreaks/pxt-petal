@@ -53,7 +53,7 @@ namespace petal {
         return pin
     }
 
-    //% blockId=button block="button sensor %port is pressed"
+    //% blockId=petal_button block="button sensor %port is pressed"
     //% color=#EA5532 weight=100 group="Digital"
     export function buttonRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
@@ -61,7 +61,7 @@ namespace petal {
         return pins.digitalReadPin(pin) == 0
     }
 
-    //% blockId=hall block="hall sensor %port is attracted"
+    //% blockId=petal_hall block="Hall sensor %port is attracted"
     //% color=#EA5532 weight=95 group="Digital"
     export function hallRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
@@ -69,7 +69,7 @@ namespace petal {
         return pins.digitalReadPin(pin) == 0
     }
 
-    //% blockId=pir block="PIR sensor %port detects motion"
+    //% blockId=petal_pir block="PIR sensor %port detects motion"
     //% color=#EA5532 weight=90 group="Digital"
     export function pirRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
