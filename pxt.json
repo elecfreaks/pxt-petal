@@ -4,8 +4,7 @@
     "description": "The micro:bit new sensor series Petal(花瓣) with HY2.0 connection port by ELECFREAKS Co.ltd",
     "license": "MIT",
     "dependencies": {
-        "core": "*",
-        "microphone": "*"
+        "core": "*"
     },
     "files": [
         "README.md",
