@@ -10,6 +10,8 @@
     "files": [
         "README.md",
         "main.ts",
+        "_locales/pxt-petal-jsdoc-strings.json",
+        "_locales/pxt-petal-strings.json",
         "_locales/zh-CN/pxt-petal-strings.json",
         "_locales/zh-CN/pxt-petal-jsdoc-strings.json"
     ],
