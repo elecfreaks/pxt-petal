@@ -35,7 +35,7 @@ basic.forever(function () {
 ```
 ## Advanced Applications
 
-Explore advanced features such as in-depth sensor data retrieval. For detailed examples and explanations, please visit our [online tutorials](https://wiki.elecfreaks.com/en/microbit/patel-series/#).
+Explore advanced features such as in-depth sensor data retrieval. For detailed examples and explanations, please visit our [online tutorials](https://wiki.elecfreaks.com/microbit/petal-series/).
 
 ## Supported Targets
 
