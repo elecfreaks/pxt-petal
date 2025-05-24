@@ -514,13 +514,13 @@ namespace petal {
     export function uvLevelRead(port: AnalogPort): number {
         let pin = portToAnalogPin(port)
         let UVlevel = pins.analogReadPin(pin);
-        // if (UVlevel > 625) {
-        //     UVlevel = 625
-        // }
+        if (UVlevel > 615) {
+            UVlevel = 615
+        }
         UVlevel = pins.map(
             UVlevel,
             0,
-            1000,
+            615,
             0,
             15
         );
