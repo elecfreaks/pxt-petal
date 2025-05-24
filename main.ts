@@ -514,17 +514,17 @@ namespace petal {
     export function uvLevelRead(port: AnalogPort): number {
         let pin = portToAnalogPin(port)
         let UVlevel = pins.analogReadPin(pin);
-        if (UVlevel > 615) {
-            UVlevel = 615
-        }
+        // if (UVlevel > 615) {
+        //     UVlevel = 615
+        // }
         UVlevel = pins.map(
             UVlevel,
             0,
-            615,
+            1000,
             0,
             15
         );
-        return Math.round(UVlevel)
+        return Math.round(UVlevel<0?0:UVlevel>15?15:UVlevel)
     }
 
     //% blockId="waterLevelRead" block="Water level sensor %Rjpin value(0~100)"
