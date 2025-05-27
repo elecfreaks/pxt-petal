@@ -79,9 +79,11 @@ namespace ESP8266_IoT {
 
     export function resetEsp8266() {
         sendRequest("AT+RESTORE", "ready") // restore to factory settings
-        sendRequest("AT+RST", "ready") // rest
-        sendRequest("AT+CWMODE=1", "OK") // set to STA mode
-        sendRequest("AT+SYSTIMESTAMP=1634953609130", "OK") // Set local timestamp.
+        sendRequest("AT+RST", "ready", 2000) // rest
+        if(sendRequest("AT+CWMODE=1", "OK") == null){
+            sendRequest("AT+CWMODE=1", "OK")
+        } // set to STA mode
+        // sendRequest("AT+SYSTIMESTAMP=1634953609130", "OK") // Set local timestamp.
         sendRequest(`AT+CIPSNTPCFG=1,8,"ntp1.aliyun.com","0.pool.ntp.org","time.google.com"`, "AT+CIPSNTPCFG", 3000)
     }
     export enum DigitalPort {
@@ -140,16 +142,18 @@ namespace ESP8266_IoT {
     export function connectWifi(ssid: string, pw: string) {
         registerMsgHandler("WIFI DISCONNECT", () => wifi_connected = false)
         registerMsgHandler("WIFI GOT IP", () => wifi_connected = true)
-        let retryCount = 3;
+        let retryCount = 2;
         while (true) {
             sendAT(`AT+CWJAP="${ssid}","${pw}"`) // connect to Wifi router
-            pauseUntil(() => wifi_connected, 3500)
+            pauseUntil(() => wifi_connected, 7000)
             if (wifi_connected == false && --retryCount > 0) {
                 resetEsp8266()
             } else {
                 break
             }
         };
+        // sendRequest("AT+USEROTA=64", "OK") // set to STA mode
+        // sendRequest("https://aithinker111.oss-cn-beijing.aliyuncs.com/TCP1460_V240.xz", "OK") // set to STA mode
     }
 
     /**
