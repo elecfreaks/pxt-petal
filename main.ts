@@ -55,6 +55,7 @@ namespace petal {
 
     /**
     * Get button state.
+    * #param port select port, eg: j1
     */
     //% blockId=petal_button block="button sensor %port is pressed"
     //% color=#EA5532 weight=100 group="Digital"
@@ -66,6 +67,7 @@ namespace petal {
 
     /**
     * Detect magnetic field information
+    * #param port select port, eg: j1
     */
     //% blockId=petal_hall block="Hall sensor %port is attracted"
     //% color=#EA5532 weight=95 group="Digital"
@@ -77,6 +79,7 @@ namespace petal {
 
     /**
     * Detect the human body.
+    * #param port select port, eg: j1
     */
     //% blockId=petal_pir block="PIR sensor %port detects motion"
     //% color=#EA5532 weight=90 group="Digital"
