@@ -1,5 +1,11 @@
 {
   "petal.buttonRead": "Get button state",
   "petal.hallRead": "Detect magnetic field information",
-  "petal.pirRead": "Detect the human body"
+  "petal.pirRead": "Detect the human body",
+  "petal.trimpotRead": "Get trimpot analog state (0~1023)",
+  "petal.noiseRead": "Get noise value (dB)",
+  "petal.soilHumidityRead": "Get soil moisture value (0~100)",
+  "petal.vibratorMotorWrite": "set vibrator state",
+  "petal.FanWrite": "set fan state",
+  "petal.dlightRead": "Get light value (lux)"
 }
