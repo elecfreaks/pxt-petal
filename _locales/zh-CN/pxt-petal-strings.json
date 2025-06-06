@@ -5,6 +5,8 @@
   "petal.DigitalPort.J4|block": "J4",
   "petal.AnalogPort.J1|block": "J1",
   "petal.AnalogPort.J2|block": "J2",
+  "petal.SwitchState.Open|block": "开启",
+  "petal.SwitchState.Off|block": "关闭",
   "petal.buttonRead|block": "按键传感器 %port 被按下",
   "petal.hallRead|block": "霍尔传感器 %port 被触发",
   "petal.pirRead|block": "人体红外传感器 %port 监测到运动",
