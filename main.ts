@@ -21,6 +21,13 @@ namespace petal {
         J2
     }
 
+    export enum SwitchState {
+        //% block="Open"
+        Open,
+        //% block="Off"
+        Off
+    }
+
     export function portToAnalogPin(port: AnalogPort): any {
         let pin = AnalogPin.P1
         switch (port) {
