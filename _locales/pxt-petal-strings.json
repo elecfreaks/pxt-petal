@@ -5,6 +5,8 @@
   "petal.DigitalPort.J4|block": "J4",
   "petal.AnalogPort.J1|block": "J1",
   "petal.AnalogPort.J2|block": "J2",
+  "petal.SwitchState.Open|block": "Open",
+  "petal.SwitchState.Off|block": "Off",
   "petal.buttonRead|block": "Button sensor %port is pressed",
   "petal.hallRead|block": "Hall sensor %port is attracted",
   "petal.pirRead|block": "PIR sensor %port detects motion",
