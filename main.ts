@@ -90,7 +90,7 @@ namespace petal {
     }
 
     /**
-    * Get button state.
+    * Get trimpot analog state.
     * @param port select port, eg: petal.AnalogPort.J1
     */
     //% blockId="petal_trimpot" block="trimpot sensor %port analog value"
