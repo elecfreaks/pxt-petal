@@ -101,7 +101,7 @@ namespace petal {
     * @param port select port, eg: petal.AnalogPort.J1
     */
     //% blockId="petal_trimpot" block="trimpot sensor %port analog value"
-    //% color=#E2C438 weight=40 group="Analog"
+    //% color=#555506 weight=40 group="Analog"
     export function trimpotRead(port: AnalogPort): number {
         let pin = portToAnalogPin(port)
         let voltage = 0
@@ -122,7 +122,7 @@ namespace petal {
     * @param port select port, eg: petal.AnalogPort.J1
     */
     //% blockId="petal_noise" block="noise sensor %port value (dB)"
-    //% color=#E2C438 weight=35 group="Analog"
+    //% color=#555506 weight=35 group="Analog"
     export function noiseRead(port: AnalogPort): number {
         let pin = portToAnalogPin(port)
         let level = 0, voltage = 0, noise = 0, h = 0, l = 0, sumh = 0, suml = 0
@@ -239,7 +239,7 @@ namespace petal {
     * @param port select port, eg: petal.AnalogPort.J1
     */
     //% blockId="petal_soilmoisture" block="soil moisture sensor %port value(0~100)"
-    //% color=#E2C438 weight=34 group="Analog"
+    //% color=#555506 weight=34 group="Analog"
     export function soilHumidityRead(port: AnalogPort): number {
         let voltage = 0, soilmoisture = 0;
         let pin = AnalogPin.P1
