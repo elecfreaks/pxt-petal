@@ -6,6 +6,6 @@
   "petal.noiseRead": "Get noise value (dB)",
   "petal.soilHumidityRead": "Get soil moisture value (0~100)",
   "petal.vibratorMotorWrite": "set vibrator state",
-  "petal.FanWrite": "set fan state",
-  "petal.dlightRead": "Get light value (lux)"
+  "petal.fanWrite": "set fan state",
+  "petal.digitalLightRead": "Get light value (lux)"
 }
