@@ -23,16 +23,37 @@ This extension is designed to program and drive the sensor series Petal (Flower 
 4. If the button is pressed, make the micro:bit display the pattern "Yes", otherwise display the pattern "No".
 
 **JavaScript Example**
+1. [Digital group example](https://makecode.microbit.org/_Fv2hpmPs0WRv).
+   ```JavaScript
+    basic.forever(function () {
+        if (petal.buttonRead(petal.DigitalPort.J1)) {
+            basic.showIcon(IconNames.Yes)
+        } else {
+            basic.showIcon(IconNames.No)
+        }
+    })
+    ```
+3. [Analog group example](https://makecode.microbit.org/_5CMfRKh7b1v8).
+   ```JavaScript
+    basic.forever(function () {
+        if (petal.trimpotRead(petal.AnalogPort.J1) > 500) {
+            basic.showIcon(IconNames.Yes)
+        } else {
+            basic.showIcon(IconNames.No)
+        }
+    })
+    ```
+5. [IIC group example](https://makecode.microbit.org/_Es5CFo3qf13g).
+   ```JavaScript
+    basic.forever(function () {
+        if (petal.digitalLightRead() > 500) {
+            basic.showIcon(IconNames.Yes)
+        } else {
+            basic.showIcon(IconNames.No)
+        }
+    })
+    ```
 
-```JavaScript
-basic.forever(function () {
-    if (petal.buttonRead(petal.DigitalPort.J1)) {
-        basic.showIcon(IconNames.Yes)
-    } else {
-        basic.showIcon(IconNames.No)
-    }
-})
-```
 ## Advanced Applications
 
 Explore advanced features such as in-depth sensor data retrieval. For detailed examples and explanations, please visit our [online tutorials](https://wiki.elecfreaks.com/microbit/petal-series/).
