@@ -1,16 +1,20 @@
-// Continuously runs the code inside this block in a loop forever.
+// Run this code forever in a loop
 basic.forever(function () {
-
-    // Checks if the button connected to port J1 on the Petal sensor is pressed.
-    // If the button is pressed, the condition evaluates to true.
+    // Check if the button on digital port J1 is pressed
     if (petal.buttonRead(petal.DigitalPort.J1)) {
-        // Displays a checkmark ("Yes") icon on the micro:bit LED screen
-        // to indicate that the button is pressed.
+        // Play a musical note (C4 for a whole beat)
+        music.play(music.tonePlayable(262, music.beat(BeatFraction.Whole)), music.PlaybackMode.UntilDone)
+    }
+
+    // Read the light sensor value; if it's greater than 500, show a "Yes" icon
+    if (petal.digitalLightRead() > 500) {
         basic.showIcon(IconNames.Yes)
-    // If the button is not pressed, this block of code will execute.
-    } else {
-        // Displays a cross ("No") icon on the micro:bit LED screen
-        // to indicate that the button is not pressed.
+    } else {  // Otherwise, show a "No" icon
         basic.showIcon(IconNames.No)
+    }
+
+    // Read the trimpot (potentiometer) on analog port J1; if the value is over 500, show a heart icon
+    if (petal.trimpotRead(petal.AnalogPort.J1) > 500) {
+        basic.showIcon(IconNames.Heart)
     }
 })
