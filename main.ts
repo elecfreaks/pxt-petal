@@ -22,9 +22,9 @@ namespace petal {
     }
 
     export enum SwitchState {
-        //% block="Open"
-        Open,
-        //% block="Off"
+        //% block="on"
+        On,
+        //% block="off"
         Off
     }
 
@@ -265,7 +265,7 @@ namespace petal {
     export function vibratorMotorWrite(port: DigitalPort, state: SwitchState): void {
         let pin = portToDigitalPin(port)
         switch (state) {
-            case SwitchState.Open:
+            case SwitchState.On:
                 pins.digitalWritePin(pin, 1)
                 break;
             case SwitchState.Off:
@@ -280,13 +280,13 @@ namespace petal {
     * @param state set fan state, eg: petal.SwitchState.Off
     * @param speed set fan speed, eg: 100
     */
-    //% blockId="petal_fan" block="motor fan sensor %port %state  || speed %speed \\%"
+    //% blockId="petal_fan" block="fan motor sensor %port %state  || speed %speed \\%"
     //% speed.min=0 speed.max=100 speed.defl=50
     //% color=#EA5532 weight=82 group="Digital"
-    export function FanWrite(port: DigitalPort, state: SwitchState, speed: number = 100): void {
+    export function fanWrite(port: DigitalPort, state: SwitchState, speed: number = 100): void {
         let pin = portToDigitalPin(port)
         switch (state) {
-            case SwitchState.Open:
+            case SwitchState.On:
                 pins.analogSetPeriod(pin, 100)
                 pins.analogWritePin(pin, Math.map(speed, 0, 100, 0, 1023))
                 break;
@@ -300,9 +300,9 @@ namespace petal {
     /**
     * Get light value (lux).
     */
-    //% blockId="petal_dlight" block="light sensor light value"
+    //% blockId="petal_digital_light" block="light sensor light value"
     //% color=#00B1ED weight=17 group="IIC"
-    export function dlightRead(): number {
+    export function digitalLightRead(): number {
         let Address = 35
         pins.i2cWriteNumber(Address, 0x10, NumberFormat.UInt8BE)
         return Math.idiv(pins.i2cReadNumber(Address, NumberFormat.UInt16BE) * 5, 6)
