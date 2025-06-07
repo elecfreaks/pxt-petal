@@ -300,7 +300,7 @@ namespace petal {
     /**
     * Get light value (lux).
     */
-    //% blockId="petal_digital_light" block="light sensor light value"
+    //% blockId="petal_digital_light" block="light sensor light value (lux)"
     //% color=#00B1ED weight=17 group="IIC"
     export function digitalLightRead(): number {
         let Address = 35
