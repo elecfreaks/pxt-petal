@@ -87,5 +87,7 @@
   "{id:group}IIC": "IIC Port",
   "petal|block": "Petal_Base",
   "Petal_Display.hsl|block": "hue %h|saturation %s|luminosity %l",
-  "Petal_Display|block": "Petal_Display"
+  "Petal_Display|block": "Petal_Display",
+  "ESP8266_IoT|block": "ESP8266_IoT",
+  "{id:category}ESP8266_IoT": "ESP8266_IoT"
 }
