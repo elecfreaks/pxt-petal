@@ -1,11 +1,10 @@
 {
     "name": "pxt-petal",
-    "version": "0.0.0",
-    "description": "",
+    "version": "0.2.0",
+    "description": "The micro:bit new sensor series Petal(花瓣) with HY2.0 connection port by ELECFREAKS Co.ltd",
+    "license": "MIT",
     "dependencies": {
         "core": "*",
-        "radio": "*",
-        "microphone": "*",
         "pxt-oled-ssd1306": "github:tinkertanker/pxt-oled-ssd1306#v2.0.17"
     },
     "files": [
