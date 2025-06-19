@@ -201,9 +201,9 @@ namespace petal {
 
     /**
     * Get button state.
-    * @param port select port, eg: petal.DigitalPort.J1
+    * @param port select port
     */
-    //% blockId=petal_button block="button sensor %port is pressed"
+    //% blockId="petal_button" block="button sensor %port is pressed"
     //% color=#EA5532 weight=100 group="Digital"
     export function buttonRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
@@ -212,10 +212,10 @@ namespace petal {
     }
 
     /**
-    * Detect magnetic field information
-    * @param port select port, eg: petal.DigitalPort.J1
+    * Detect magnetic field information.
+    * @param port select port
     */
-    //% blockId=petal_hall block="Hall sensor %port is attracted"
+    //% blockId="petal_hall" block="Hall sensor %port is attracted"
     //% color=#EA5532 weight=95 group="Digital"
     export function hallRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
@@ -225,9 +225,9 @@ namespace petal {
 
     /**
     * Detect the human body.
-    * @param port select port, eg: petal.DigitalPort.J1
+    * @param port select port
     */
-    //% blockId=petal_pir block="PIR sensor %port detects motion"
+    //% blockId="petal_pir" block="PIR sensor %port detects motion"
     //% color=#EA5532 weight=90 group="Digital"
     export function pirRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
@@ -263,15 +263,26 @@ namespace petal {
 
     let currentBPM: number = 120;
 
-    //% blockId=set_bpm_block
-    //% block="set rhythm %bpm bpm"
+    /**
+    * Set the rhythm of the buzzer.
+    * @param port select port
+    */
+    //% blockId="petal_set_bpm_block" block="set rhythm %bpm bpm"
     //% bpm.min=40 bpm.max=500 bpm.defl=120
     //% color=#EA5532 weight=70 group="Digital"
     export function setBPM(bpm: number): void {
         currentBPM = Math.max(1, Math.min(500, bpm)); // 限制范围1-500
     }
 
-    //% block="Buzzer sensor %port play ring tone |%note=device_note %beat rhythm %mode"
+    /**
+     * Play a tone on buzzer for a beat fraction of a whole note.
+     * @param port select port
+     * @param Note select frequency of the tone
+     * @param beat fraction of a whole note
+     * @param mode select playback mode
+     */
+    //% blockId="petal_play_integrated_tone"
+    //% block="buzzer sensor %port play ring tone |%note=device_note %beat rhythm %mode"
     //% beat.defl=BeatFraction.Whole
     //% mode.defl=PlaybackMode.UntilDone
     //% color=#EA5532 weight=60 group="Digital"
@@ -290,8 +301,12 @@ namespace petal {
         music.play(music.tonePlayable(Note, music.beat(beat)), mode)
     }
 
-
-    //% blockId=buzzer block="Buzzer sensor %port play ring tone (Hz)|%note=device_note"
+    /**
+     * Play a tone on buzzer.
+     * @param port select port
+     * @param Note select frequency of the tone
+     */
+    //% blockId="petal_buzzer" block="buzzer sensor %port play ring tone (Hz)|%note=device_note"
     //% help=music/ring-tone
     //% color=#EA5532 weight=65 group="Digital"
     //% parts="headphone"
@@ -302,13 +317,21 @@ namespace petal {
         music.ringTone(Note)
     }
 
-    //% block="Stop buzzer on %port"
+    /**
+     * Stop buzzer.
+     * @param port select port
+     */
+    //% blockId="petal_stopBuzzer" block="stop buzzer on %port"
     //% color=#EA5532 weight=75 group="Digital"
     export function stopBuzzer(port: DigitalPort): void {
         buzzerWrite(port, 0);
     }
 
-    //% blockId="trimpot" block="Trimpot sensor %port analog value"
+    /**
+     * Detect potentiometer rotation analog value.
+     * @param port select port
+     */
+    //% blockId="petal_trimpot" block="trimpot sensor %port analog value"
     //% color=#E2C438 weight=40 group="Analog"
     export function trimpotRead(port: AnalogPort): number {
         let pin = portToAnalogPin(port)
@@ -325,7 +348,11 @@ namespace petal {
         return Math.round(Math.map(voltage, 3, 1015, 0, 1023))
     }
 
-    //% blockId="noise" block="Noise sensor %port value (dB)"
+    /**
+     * Get noise value(dB).
+     * @param port select port
+     */
+    //% blockId="petal_noise" block="noise sensor %port value (dB)"
     //% color=#E2C438 weight=35 group="Analog"
     export function noiseRead(port: AnalogPort): number {
         let pin = portToAnalogPin(port)
@@ -438,7 +465,11 @@ namespace petal {
         // return voltage
     }
 
-    //% blockId="readsoilmoisture" block="Soil moisture sensor %port value(0~100)"
+    /**
+     * Get soil moisture value(0~100).
+     * @param port select port
+     */
+    //% blockId="petal_readsoilmoisture" block="soil moisture sensor %port value(0~100)"
     //% color=#E2C438 weight=34 group="Analog"
     export function soilHumidityRead(port: AnalogPort): number {
         let voltage = 0, soilmoisture = 0;
@@ -455,7 +486,11 @@ namespace petal {
         return Math.round(soilmoisture >= 100 ? 100 : soilmoisture <= 0 ? 0 : soilmoisture);
     }
 
-    //% blockId="photocell" block="Photocell sensor %port light intensity(lux)"
+    /**
+     * Get photocell value (lux).
+     * @param port select port
+     */
+    //% blockId="petal_photocell" block="photocell sensor %port light intensity(lux)"
     //% color=#E2C438 weight=33 group="Analog"
     export function photocellRead(port: AnalogPort): number {
         let pin = portToAnalogPin(port);
@@ -507,12 +542,17 @@ namespace petal {
     //     return Math.round(voltage)
     // }
 
-    //% blockId="redled" block="Red led sensor %port %state"
+    /**
+     * Set led state (on or off).
+     * @param port select port
+     * @param state switch state
+     */
+    //% blockId="petal_redled" block="led sensor %port %state"
     //% color=#EA5532 weight=83 group="Digital"
     export function redLedWrite(port: DigitalPort, state: SwitchState): void {
         let pin = portToDigitalPin(port)
         switch (state) {
-            case SwitchState.Open:
+            case SwitchState.On:
                 pins.digitalWritePin(pin, 0)
                 break;
             case SwitchState.Off:
@@ -521,7 +561,11 @@ namespace petal {
         }
     }
 
-    //% blockId="uvLevel" block="UV sensor %Rjpin level(0~15)"
+    /**
+     * Get UV level (0~15).
+     * @param port select port
+     */
+    //% blockId="petal_uvLevel" block="UV sensor %Rjpin level(0~15)"
     //% color=#E2C438 weight=30 group="Analog"
     export function uvLevelRead(port: AnalogPort): number {
         let pin = portToAnalogPin(port)
@@ -539,7 +583,11 @@ namespace petal {
         return Math.round(UVlevel<0?0:UVlevel>15?15:UVlevel)
     }
 
-    //% blockId="waterLevelRead" block="Water level sensor %Rjpin value(0~100)"
+    /**
+     * Get water level (0~100).
+     * @param port select port
+     */
+    //% blockId="petal_waterLevelRead" block="water level sensor %Rjpin value(0~100)"
     //% color=#E2C438 weight=28 group="Analog"
     export function waterLevelRead(port: AnalogPort): number {
         let pin = portToAnalogPin(port)
@@ -560,7 +608,11 @@ namespace petal {
         return Math.round(waterlevel)
     }
 
-    //% blockId=vibrationDetection block="Vibration detection sensor %port vibration detected"
+    /**
+     * Get vibration detection state.
+     * @param port select port
+     */
+    //% blockId="petal_vibrationDetection" block="vibration detection sensor %port vibration detected"
     //% color=#EA5532 weight=88 group="Digital"
     export function vibrationDetectionRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
@@ -568,7 +620,14 @@ namespace petal {
         return pins.digitalReadPin(pin) == 0
     }
 
-    //% block="set %severtype servo  on %port %severlist to angle %angle"
+    /**
+     * Control servo motor.
+     * @param severtype select servo type
+     * @param port select port
+     * @param severlist select servo port
+     * @param angle set angle value
+     */
+    //% blockId="petal_setSeverAngle" block="set %severtype servo  on %port %severlist to angle %angle"
     //% angle.min=0 angle.max=180
     //% color=#EA5532 weight=86 group="Digital"
     //% inlineInputMode=inline
@@ -591,7 +650,13 @@ namespace petal {
         pins.servoSetPulse(pin, pulseWidth);
     }
 
-    //% block="set continuous servo on %port %severlist speed to %speed\\%"
+    /**
+     * Set continuous servo speed.
+     * @param port select port
+     * @param severlist select servo port
+     * @param speed set speed value
+     */
+    //% blockId="petal_setSeverSpeed" block="set continuous servo on %port %severlist speed to %speed\\%"
     //% speed.min=-100 speed.max=100
     //% color=#EA5532 weight=87 group="Digital"
     //% inlineInputMode=inline
@@ -614,7 +679,11 @@ namespace petal {
         pins.servoSetPulse(pin, pulseWidth);
     }
 
-    //% blockId=tilt block="Tilt sensor %port Tilt lift detected"
+    /**
+     * Get tilt detection state.
+     * @param port select port
+     */
+    //% blockId="petal_tilt" block="tilt sensor %port Tilt lift detected"
     //% color=#EA5532 weight=84 group="Digital"
     export function tiltRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
@@ -622,12 +691,17 @@ namespace petal {
         return pins.digitalReadPin(pin) == 0
     }
 
-    //% blockId="vibratorMotor" block="Vibrator motor sensor %port %state"
+    /**
+     * Set vibration motor state.
+     * @param port select port
+     * @param state set switch state
+     */
+    //% blockId="petal_vibratorMotor" block="vibrator motor sensor %port %state"
     //% color=#EA5532 weight=81 group="Digital"
     export function vibratorMotorWrite(port: DigitalPort, state: SwitchState): void {
         let pin = portToDigitalPin(port)
         switch (state) {
-            case SwitchState.Open:
+            case SwitchState.On:
                 pins.digitalWritePin(pin, 1)
                 break;
             case SwitchState.Off:
@@ -636,13 +710,19 @@ namespace petal {
         }
     }
 
-    //% blockId="fanWrite" block="Motor fan sensor %port %state  || speed %speed \\%"
+    /**
+     * Set fan motor state.
+     * @param port select port
+     * @param state set switch state
+     * @param speed set speed value
+     */
+    //% blockId="petal_fanWrite" block="fan motor sensor %port %state  || speed %speed \\%"
     //% speed.min=0 speed.max=100 speed.defl=50
     //% color=#EA5532 weight=82 group="Digital"
-    export function FanWrite(port: DigitalPort, state: SwitchState, speed: number = 100): void {
+    export function fanWrite(port: DigitalPort, state: SwitchState, speed: number = 100): void {
         let pin = portToDigitalPin(port)
         switch (state) {
-            case SwitchState.Open:
+            case SwitchState.On:
                 pins.analogSetPeriod(pin, 100)
                 pins.analogWritePin(pin, Math.map(speed, 0, 100, 0, 1023))
                 break;
@@ -653,7 +733,12 @@ namespace petal {
         }
     }
 
-    //% blockId=sonarbit block="Ultrasonic sensor %port distance %distance_unit"
+    /**
+     * Get ultrasonic sensor distance.
+     * @param port select port
+     * @param distance_unit select distance unit
+     */
+    //% blockId="petal_sonarbit" block="ultrasonic sensor %port distance %distance_unit"
     //% color=#EA5532 weight=58 group="Digital"
     export function ultrasoundSensor(port: DigitalPort, distance_unit: Distance_Unit_List): number {
         let pin = portToDigitalPin(port)
@@ -724,7 +809,12 @@ namespace petal {
         }
         return false;
     }
-    //% blockId="petalTempRH" block="Temp and RH sensor %state value"
+
+    /**
+     * Get Temp and RH sensor value.
+     * @param state select read Temp or RH
+     */
+    //% blockId="petal_petalTempRH" block="temperature and RH sensor %state value"
     //% color=#00B1ED weight=20 group="IIC"
     export function petalTempRHRead(state: TempAndRh): number {
         initAHT20()
@@ -741,8 +831,11 @@ namespace petal {
         }
     }
 
-
-    //% blockId=optoelectronic block="Optoelectronic sensor %port Obstruction detected"
+    /**
+     * Get Optoelectronic sensor state.
+     * @param port select port
+     */
+    //% blockId="petal_optoelectronic" block="optoelectronic sensor %port Obstruction detected"
     //% color=#EA5532 weight=93 group="Digital"
     export function optoelectronicRead(port: DigitalPort): boolean {
         let pin = portToDigitalPin(port)
@@ -750,9 +843,12 @@ namespace petal {
         return pins.digitalReadPin(pin) == 1
     }
 
-    //% blockId="dlight" block="Dlight sensor light value"
+    /**
+     * Get digital light sensor value (lux).
+     */
+    //% blockId="petal_digital_light" block="digital light sensor light value (lux)"
     //% color=#00B1ED weight=17 group="IIC"
-    export function dlightRead(): number {
+    export function digitalLightRead(): number {
         let Address = 35
         pins.i2cWriteNumber(Address, 0x10, NumberFormat.UInt8BE)
         return Math.idiv(pins.i2cReadNumber(Address, NumberFormat.UInt16BE) * 5, 6)
@@ -762,7 +858,10 @@ namespace petal {
     let GXT310_I2C_ADDRESS = 0x48; // 7位I2C地址
     let HBTtemperature = 0.0;
 
-    //% blockId="hbt" block="Hbt sensor read temperature value"
+    /**
+     * Get Hbt sensor temperature value (°C).
+     */
+    //% blockId="petal_hbt" block="Hbt sensor read temperature value"
     //% color=#00B1ED weight=15 group="IIC"
     export function hbtRead(): number {
         let buff = pins.createBuffer(2);
@@ -835,9 +934,15 @@ namespace petal {
         }
         return dat
     }
-    //% blockId=ds18b20 block="ds18b20 sensor %port read %state value"
+
+    /**
+     * Get ds18b20 sensor temperature value.
+     * @param port select port
+     * @param state select temperature unit
+     */
+    //% blockId="petal_ds18b20" block="ds18b20 sensor %port read %state value"
     //% color=#EA5532 weight=55 group="Digital"
-    export function Ds18b20Temp(port: DigitalPort, state: DS18B20ValType): number {
+    export function ds18b20Temp(port: DigitalPort, state: DS18B20ValType): number {
         let pin = portToDigitalPin(port);
         init_18b20(pin)
         write_18b20(pin, 0xCC)
@@ -866,7 +971,12 @@ namespace petal {
 
     }
 
-    //% blockId=tracking block="Line-tracking sensor %port is %state"
+    /**
+     * Get line-tracking sensor state.
+     * @param port select port
+     * @param state select tracking state
+     */
+    //% blockId="petal_tracking" block="line-tracking sensor %port is %state"
     //% color=#EA5532 weight=54 group="Digital"
     export function trackingSensor(port: DigitalPort, state: TrackingStateType): boolean {
         let lpin = portToDigitalPin(port);
@@ -974,7 +1084,10 @@ namespace petal {
         return { ax, ay, az, gx, gy, gz, temperature };
     }
 
-    //% block="six AxisImu sensor calibration (static 3 seconds)"
+    /**
+     * Calibrate using a six-axis IMU sensor and place it statically for 3 seconds.
+     */
+    //% blockId="petal__6AxisImuWrite" block="six AxisImu sensor calibration (static 3 seconds)"
     //% color=#00B1ED weight=11 group="IIC"
     export function _6AxisImuWrite(): void {
         isCalibrating = true;
@@ -1017,7 +1130,13 @@ namespace petal {
         isCalibrating = false;
     }
 
-    //% blockId="_6AxisImu" block="six AxisImu sensor read %state value %rangeA %RangeG"
+    /**
+     * Get the value of the six-axis IMU sensor
+     * @param state select the axis that the gyroscope needs to detect
+     * @param RangeA Select the detection range of the gyroscope acceleration
+     * @param RangeG select the range for gyroscope detection
+     */
+    //% blockId="petal__6AxisImu" block="six AxisImu sensor read %state value %rangeA %RangeG"
     //% color=#00B1ED weight=10 group="IIC"
     export function _6AxisImuRead(state: _6AxisState, RangeA: AccelScale6, RangeG: GyroRange6): number {
         if (_6AxisImuFlag == true) {
@@ -1171,7 +1290,7 @@ namespace petal {
         return value;
     }
 
-    function AccelReadData(): { ax: number, ay: number, az: number } {
+    function accelReadData(): { ax: number, ay: number, az: number } {
         basic.pause(5);
         let ax = read16(0x28);
         let ay = read16(0x2A);
@@ -1181,9 +1300,12 @@ namespace petal {
 
     }
 
-    //% block="Accelerometer sensor calibration (static 3 seconds)"
+    /**
+     * Calibrate the three axes after remaining stationary for three seconds
+     */
+    //% blockId="petal_AccelWrite" block="accelerometer sensor calibration (static 3 seconds)"
     //% color=#00B1ED weight=6 group="IIC"
-    export function AccelWrite(): void {
+    export function accelWrite(): void {
         isCalibrating3 = true;
 
         // Step 1: 初始化采样数据
@@ -1192,7 +1314,7 @@ namespace petal {
 
         // Step 2: 数据采集阶段
         for (let i = 0; i < sampleCount; i++) {
-            let raw = AccelReadData();  // 获取原始数据
+            let raw = accelReadData();  // 获取原始数据
 
             // 累加速度计数据（预期静止状态下各轴应为0）
             accelSamples.x += raw.ax;
@@ -1210,15 +1332,20 @@ namespace petal {
         isCalibrating3 = false;
     }
 
-    //% blockId="Accel" block="Accelerometer sensor read %state value %Range"
+    /**
+     * Get the acceleration value of the three axes
+     * @param state select the direction axis that needs to be inspected
+     * @param Range select the acceleration range
+     */
+    //% blockId="petal_Accel" block="accelerometer sensor read %state value %Range"
     //% color=#00B1ED weight=5 group="IIC"
-    export function AccelRead(state: AccelerometerState, Range: ScaleRange): number {
+    export function accelRead(state: AccelerometerState, Range: ScaleRange): number {
         if (accelFlag) {
             initAccel(Range); // 默认设置为±2g量程
             accelFlag = false;
         }
 
-        let data = AccelReadData();
+        let data = accelReadData();
 
         data.ax -= accelBias3.x
         data.ay -= accelBias3.y

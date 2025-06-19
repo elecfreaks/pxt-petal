@@ -11,9 +11,9 @@
         "README.md",
         "main.ts",
         "display.ts",
+        "esp8266.ts",
         "_locales/zh-CN/pxt-petal-strings.json",
-        "_locales/zh-CN/pxt-petal-jsdoc-strings.json",
-        "esp8266.ts"
+        "_locales/zh-CN/pxt-petal-jsdoc-strings.json"
     ],
     "testFiles": [
         "test.ts"
