@@ -4,11 +4,14 @@
     "description": "The micro:bit new sensor series Petal(花瓣) with HY2.0 connection port by ELECFREAKS Co.ltd",
     "license": "MIT",
     "dependencies": {
-        "core": "*"
+        "core": "*",
+        "pxt-oled-ssd1306": "github:tinkertanker/pxt-oled-ssd1306#v2.0.17"
     },
     "files": [
         "README.md",
         "main.ts",
+        "display.ts",
+        "esp8266.ts",
         "_locales/zh-CN/pxt-petal-strings.json",
         "_locales/zh-CN/pxt-petal-jsdoc-strings.json"
     ],
@@ -17,7 +20,7 @@
     ],
     "public": true,
     "targetVersions": {
-        "target": "7.0.57",
+        "target": "7.0.61",
         "targetId": "microbit"
     },
     "supportedTargets": [
