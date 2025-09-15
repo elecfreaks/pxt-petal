@@ -169,6 +169,7 @@ namespace ESP8266_IoT {
 /************************************************************************
  * MQTT
  ************************************************************************/
+//% color=#0fbc11 icon="\uf1eb" block="IOT Connectivity" blockId="IOT Connectivity"
 namespace ESP8266_IoT {
 
     export enum SchemeList {
@@ -273,6 +274,7 @@ namespace ESP8266_IoT {
 /************************************************************************
  * thingspeak
  ************************************************************************/
+//% color=#0fbc11 icon="\uf1eb" block="IOT Connectivity" blockId="IOT Connectivity"
 namespace ESP8266_IoT {
 
     const THINGSPEAK_HOST = "api.thingspeak.com"
@@ -345,6 +347,7 @@ namespace ESP8266_IoT {
 /************************************************************************
  * smart_iot
  ************************************************************************/
+//% color=#0fbc11 icon="\uf1eb" block="IOT Connectivity" blockId="IOT Connectivity"
 namespace ESP8266_IoT {
 
     export enum SmartIotSwitchState {
@@ -489,6 +492,7 @@ namespace ESP8266_IoT {
 /************************************************************************
  * IFTTT
  ************************************************************************/
+//% color=#0fbc11 icon="\uf1eb" block="IOT Connectivity" blockId="IOT Connectivity"
 namespace ESP8266_IoT {
 
 
