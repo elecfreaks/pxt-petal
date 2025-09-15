@@ -1,4 +1,4 @@
-//% color=#0fbc11 icon="\uf1eb"
+//% color=#0fbc11 icon="\uf1eb" block="IOT Connectivity" blockId="IOT Connectivity" 
 namespace ESP8266_IoT {
 
     type MsgHandler = {
