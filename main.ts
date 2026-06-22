@@ -83,11 +83,11 @@ namespace petal {
     }
 
     export enum _6AxisState {
-        //% block="AX(g)"
+        //% block="AX(mg)"
         AX,
-        //% block="AY(g)"
+        //% block="AY(mg)"
         AY,
-        //% block="AZ(g)"
+        //% block="AZ(mg)"
         AZ,
         //% block="GX(°/s)"
         GX,
@@ -1014,11 +1014,14 @@ namespace petal {
 
     let currentAccelRange = 2; // 默认±2g
     let currentGyroRange = 512; // 默认±512dps
+    let accelBiasRange = 2;
+    let gyroBiasRange = 512;
 
     // 全局变量存储校准偏移量
     let accelBias = { x: 0, y: 0, z: 0 };
     let gyroBias = { x: 0, y: 0, z: 0 };
     let isCalibrating = false;
+    let imuCalibrated = false;
 
     function initSensor(RangeA: number, RangeG: number) {
         // writeRegister(REG_SELFTEST, 0xA2);  // 启动自检
@@ -1051,6 +1054,8 @@ namespace petal {
 
         writeRegister(REG_FILTER_CONFIG, 0x01); // 低通滤波器配置
         writeRegister(REG_POWER_CONFIG, 0x03);  // 电源管理模式
+        currentAccelRange = RangeA;
+        currentGyroRange = RangeG;
     }
 
 
@@ -1084,6 +1089,21 @@ namespace petal {
         return { ax, ay, az, gx, gy, gz, temperature };
     }
 
+    function discardImuSamples(count: number): void {
+        for (let i = 0; i < count; i++) {
+            basic.pause(10);
+            readData();
+        }
+    }
+
+    function imuAccelRawToMg(raw: number, range: number): number {
+        return raw * (range * 1000.0) / 32768;
+    }
+
+    function imuGyroRawToDps(raw: number, range: number): number {
+        return raw * range / 32768.0;
+    }
+
     /**
      * Calibrate using a six-axis IMU sensor and place it statically for 3 seconds.
      */
@@ -1091,6 +1111,11 @@ namespace petal {
     //% color=#00B1ED weight=11 group="IIC"
     export function _6AxisImuWrite(): void {
         isCalibrating = true;
+
+        if (_6AxisImuFlag) {
+            initSensor(currentAccelRange, currentGyroRange);
+            _6AxisImuFlag = false;
+        }
 
         // Step 1: 初始化采样数据
         let accelSamples = { x: 0, y: 0, z: 0 };
@@ -1118,14 +1143,17 @@ namespace petal {
         accelBias = {
             x: accelSamples.x / sampleCount,
             y: accelSamples.y / sampleCount,
-            z: accelSamples.z / sampleCount - (32768 / currentAccelRange)  // 补偿Z轴重力影响（假设设备水平放置）
+            z: accelSamples.z / sampleCount
         };
+        accelBiasRange = currentAccelRange;
 
         gyroBias = {
             x: gyroSamples.x / sampleCount,
             y: gyroSamples.y / sampleCount,
             z: gyroSamples.z / sampleCount
         };
+        gyroBiasRange = currentGyroRange;
+        imuCalibrated = true;
 
         isCalibrating = false;
     }
@@ -1139,10 +1167,9 @@ namespace petal {
     //% blockId="petal__6AxisImu" block="six AxisImu sensor read %state value %rangeA %RangeG"
     //% color=#00B1ED weight=10 group="IIC"
     export function _6AxisImuRead(state: _6AxisState, RangeA: AccelScale6, RangeG: GyroRange6): number {
-        if (_6AxisImuFlag == true) {
-            currentAccelRange = RangeA;
-            currentGyroRange = RangeG;
+        if (_6AxisImuFlag == true || currentAccelRange != RangeA || currentGyroRange != RangeG) {
             initSensor(RangeA, RangeG);
+            discardImuSamples(3);
             _6AxisImuFlag = false;
         }
 
@@ -1153,33 +1180,35 @@ namespace petal {
 
         let data = readData();
 
-        data.ax -= accelBias.x
-        data.ay -= accelBias.y
-        data.az -= accelBias.z
-        data.gx -= gyroBias.x
-        data.gy -= gyroBias.y
-        data.gz -= gyroBias.z
-
-        // 加速度计：1 LSB = (1000 mg) / (灵敏度 LSB/g)
-        let accelScale = (currentAccelRange * 1000.0) / 32768; // mg/LSB
-
-        // 陀螺仪：1 LSB = (量程 dps) / 32768 LSB
-        let gyroScale = currentGyroRange / 32768.0; // dps/LSB
+        let ax = imuAccelRawToMg(data.ax, currentAccelRange);
+        let ay = imuAccelRawToMg(data.ay, currentAccelRange);
+        let az = imuAccelRawToMg(data.az, currentAccelRange);
+        let gx = imuGyroRawToDps(data.gx, currentGyroRange);
+        let gy = imuGyroRawToDps(data.gy, currentGyroRange);
+        let gz = imuGyroRawToDps(data.gz, currentGyroRange);
+        if (imuCalibrated) {
+            ax -= imuAccelRawToMg(accelBias.x, accelBiasRange);
+            ay -= imuAccelRawToMg(accelBias.y, accelBiasRange);
+            az -= imuAccelRawToMg(accelBias.z, accelBiasRange) - 1000;
+            gx -= imuGyroRawToDps(gyroBias.x, gyroBiasRange);
+            gy -= imuGyroRawToDps(gyroBias.y, gyroBiasRange);
+            gz -= imuGyroRawToDps(gyroBias.z, gyroBiasRange);
+        }
 
         //结果保留两位小数
         switch (state) {
             case _6AxisState.AY:
-                return 0 - Math.round(data.ax * accelScale);
+                return 0 - Math.round(ax);
             case _6AxisState.AX:
-                return 0 - Math.round(data.ay * accelScale);
+                return 0 - Math.round(ay);
             case _6AxisState.AZ:
-                return Math.round(data.az * accelScale);
+                return Math.round(az);
             case _6AxisState.GY:
-                return 0 - Math.round(data.gx * gyroScale);
+                return 0 - Math.round(gx);
             case _6AxisState.GX:
-                return 0 - Math.round(data.gy * gyroScale);
+                return 0 - Math.round(gy);
             case _6AxisState.GZ:
-                return Math.round(data.gz * gyroScale);
+                return Math.round(gz);
             case _6AxisState._6Temperature:
                 return Math.round(data.temperature * 10) / 10;
             default:
@@ -1200,10 +1229,13 @@ namespace petal {
     let lis3dhAddress = 0x19; // 默认I2C地址
     let scaleFactor = 2; // 对于±2g量程，默认比例因子
     let accelFlag = true;
+    let currentAccelRange3 = ScaleRange.Range_2G;
+    let accelBiasRange3 = ScaleRange.Range_2G;
 
     // 全局变量存储校准偏移量
     let accelBias3 = { x: 0, y: 0, z: 0 };
     let isCalibrating3 = false;
+    let accelCalibrated3 = false;
 
     /**
      * 初始化加速度计
@@ -1225,6 +1257,7 @@ namespace petal {
 
         // 设置CTRL_REG4: 设置量程
         setScaleRange(range);
+        currentAccelRange3 = range;
     }
 
     /**
@@ -1300,6 +1333,26 @@ namespace petal {
 
     }
 
+    function discardAccelSamples(count: number): void {
+        for (let i = 0; i < count; i++) {
+            accelReadData();
+        }
+    }
+
+    function accelSensitivityMgPerDigit(range: number): number {
+        switch (range) {
+            case ScaleRange.Range_2G: return 1;
+            case ScaleRange.Range_4G: return 2;
+            case ScaleRange.Range_8G: return 4;
+            case ScaleRange.Range_16G: return 12;
+            default: return 1;
+        }
+    }
+
+    function accelRawToMg(raw: number, range: number): number {
+        return raw * accelSensitivityMgPerDigit(range) / 16;
+    }
+
     /**
      * Calibrate the three axes after remaining stationary for three seconds
      */
@@ -1307,6 +1360,11 @@ namespace petal {
     //% color=#00B1ED weight=6 group="IIC"
     export function accelWrite(): void {
         isCalibrating3 = true;
+
+        if (accelFlag) {
+            initAccel(currentAccelRange3);
+            accelFlag = false;
+        }
 
         // Step 1: 初始化采样数据
         let accelSamples = { x: 0, y: 0, z: 0 };
@@ -1326,8 +1384,10 @@ namespace petal {
         accelBias3 = {
             x: accelSamples.x / sampleCount,
             y: accelSamples.y / sampleCount,
-            z: accelSamples.z / sampleCount - (32768 / scaleFactor)  // 补偿Z轴重力影响（假设设备水平放置）
+            z: accelSamples.z / sampleCount
         };
+        accelBiasRange3 = currentAccelRange3;
+        accelCalibrated3 = true;
 
         isCalibrating3 = false;
     }
@@ -1340,27 +1400,31 @@ namespace petal {
     //% blockId="petal_Accel" block="accelerometer sensor read %state value %Range"
     //% color=#00B1ED weight=5 group="IIC"
     export function accelRead(state: AccelerometerState, Range: ScaleRange): number {
-        if (accelFlag) {
+        if (accelFlag || currentAccelRange3 != Range) {
             initAccel(Range); // 默认设置为±2g量程
+            discardAccelSamples(3);
             accelFlag = false;
         }
 
         let data = accelReadData();
 
-        data.ax -= accelBias3.x
-        data.ay -= accelBias3.y
-        data.az -= accelBias3.z
+        let ax = accelRawToMg(data.ax, currentAccelRange3);
+        let ay = accelRawToMg(data.ay, currentAccelRange3);
+        let az = accelRawToMg(data.az, currentAccelRange3);
+        if (accelCalibrated3) {
+            ax -= accelRawToMg(accelBias3.x, accelBiasRange3);
+            ay -= accelRawToMg(accelBias3.y, accelBiasRange3);
+            az -= accelRawToMg(accelBias3.z, accelBiasRange3) - 1000;
+        }
 
         // 加速度计：1 LSB = (1000 mg) / (灵敏度 LSB/g)
-        let accelScale = (scaleFactor * 1000.0) / 32768; // mg/LSB
-
         switch (state) {
             case AccelerometerState.Y:
-                return Math.round(data.ax * accelScale);
+                return Math.round(ax);
             case AccelerometerState.X:
-                return Math.round(data.ay * accelScale);
+                return Math.round(ay);
             case AccelerometerState.Z:
-                return Math.round(data.az * accelScale);
+                return Math.round(az);
             default:
                 return 0;
         }
