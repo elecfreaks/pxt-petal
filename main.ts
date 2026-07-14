@@ -1028,7 +1028,7 @@ namespace petal {
         // basic.pause(1750);                  // 等待自检完成
         // writeRegister(REG_SELFTEST, 0x00);  // 退出自检模式（部分传感器需要此操作）
         // basic.pause(100)
-        writeRegister(REG_I2C_CONFIG, 0x60);    // 重新配置I2C
+        writeRegister(REG_I2C_CONFIG, 0x40);    // 重新配置I2C
         basic.pause(100)
         let regValue = 0x00;
         switch (RangeA) {
@@ -1041,13 +1041,13 @@ namespace petal {
         regValue = 0x00;
         switch (RangeG) {
             case 16: regValue = 0x00; break; // ±16dps (000)
-            case 32: regValue = 0x20; break; // ±32dps (001 << 4)
-            case 64: regValue = 0x40; break; // ±64dps (010 << 4)
-            case 128: regValue = 0x60; break; // ±128dps (011 << 4)
-            case 256: regValue = 0x80; break; // ±256dps (100 << 4)
-            case 512: regValue = 0xA0; break; // ±512dps (101 << 4)
-            case 1024: regValue = 0xC0; break; // ±1024dps (110 << 4)
-            case 2048: regValue = 0xE0; break; // ±2048dps (111 << 4)
+            case 32: regValue = 0x10; break; // ±32dps (001 << 4)
+            case 64: regValue = 0x20; break; // ±64dps (010 << 4)
+            case 128: regValue = 0x30; break; // ±128dps (011 << 4)
+            case 256: regValue = 0x40; break; // ±256dps (100 << 4)
+            case 512: regValue = 0x50; break; // ±512dps (101 << 4)
+            case 1024: regValue = 0x60; break; // ±1024dps (110 << 4)
+            case 2048: regValue = 0x70; break; // ±2048dps (111 << 4)
         }
         regValue |= 0x04;
         writeRegister(REG_GYRO_CONFIG, regValue);
