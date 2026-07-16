@@ -1,5 +1,9 @@
 {
   "Petal_Basic": "Functions to Petal sensor by ELECFREAKS Co.,Ltd.",
+  "petal.crashRead": "Get crash sensor state.",
+  "petal.crashRead|param|port": "select port",
+  "petal.dustRead": "Get dust value (μg/m³).",
+  "petal.dustRead|param|port": "select port",
   "Petal_Basic.Crash": "check crash",
   "Petal_Basic.Dust": "get dust value (μg/m³)",
   "Petal_Basic.Dust|param|Rjpin": "describe parameter here, eg: Rjpin.J1",

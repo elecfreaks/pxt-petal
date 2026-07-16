@@ -1,4 +1,8 @@
 {
+  "petal.crashRead": "Get crash sensor state.",
+  "petal.crashRead|param|port": "select port",
+  "petal.dustRead": "Get dust value (μg/m³).",
+  "petal.dustRead|param|port": "select port",
   "Petal_Display": "Functions to Petal sensor by ELECFREAKS Co.,Ltd.",
   "Petal_Display.NeoPixelMode": "Different modes for RGB or RGB+W NeoPixel strips",
   "Petal_Display.Strip.clear": "Turn off all LEDs.\nYou need to call ``show`` to make the changes visible.",
