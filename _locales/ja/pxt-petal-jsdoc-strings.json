@@ -1,4 +1,9 @@
 {
+  "petal.onASR": "Run code when the ASR sensor hears a vocabulary entry.",
+  "petal.onASR|param|vocabulary": "select vocabulary",
+  "petal.onASR|param|handler": "code to run",
+  "petal.setASRLearn": "Set the ASR sensor to learning mode.",
+  "petal.delASRLearn": "Clear learned entries from the ASR sensor.",
   "Petal_Basic": "Functions to Petal sensor by ELECFREAKS Co.,Ltd.",
   "Petal_Basic.Crash": "check crash",
   "Petal_Basic.Dust": "get dust value (μg/m³)",
