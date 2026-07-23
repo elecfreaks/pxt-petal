@@ -148,6 +148,76 @@ namespace petal {
         Range2048dps = 2048
     }
 
+    export enum vocabularyList {
+        //% block="Hi, Shaun"
+        Hi_Shaun = 1,
+        //% block="Lights on"
+        Turn_on_lights = 16,
+        //% block="Lights off"
+        Turn_off_lights = 17,
+        //% block="Turn left"
+        Turn_left = 18,
+        //% block="Turn right"
+        Turn_right = 19,
+        //% block="Full speed ahead"
+        Go_forward = 20,
+        //% block="Reversing"
+        Go_Backwards = 21,
+        //% block="Line Tracking"
+        Line_tacking = 22,
+        //% block="Avoid object"
+        Avoid_object = 23,
+        //% block="Stop"
+        Stop_car = 24,
+        //% block="Start device"
+        Start_device = 32,
+        //% block="Turn off device"
+        Close_device = 33,
+        //% block="Pause"
+        Pause_device = 34,
+        //% block="Keep going"
+        Keep_going = 35,
+        //% block="Raise a level"
+        Add_a_level = 36,
+        //% block="Lower a level"
+        Lower_a_level = 37,
+        //% block="Music on"
+        Music_on = 38,
+        //% block="Music off"
+        Music_off = 39,
+        //% block="Switch music"
+        Switch_music = 40,
+        //% block="Execute function one"
+        Execute_function_one = 49,
+        //% block="Execute function two"
+        Execute_function_two = 50,
+        //% block="Learning entry 1"
+        Learning_entry_1 = 80,
+        //% block="Learning entry 2"
+        Learning_entry_2 = 81,
+        //% block="Learning entry 3"
+        Learning_entry_3 = 82,
+        //% block="Learning entry 4"
+        Learning_entry_4 = 83,
+        //% block="Learning entry 5"
+        Learning_entry_5 = 84,
+        //% block="Learning entry 6"
+        Learning_entry_6 = 85,
+        //% block="Learning entry 7"
+        Learning_entry_7 = 86,
+        //% block="Learning entry 8"
+        Learning_entry_8 = 87,
+        //% block="Learning entry 9"
+        Learning_entry_9 = 88,
+        //% block="Learning entry 10"
+        Learning_entry_10 = 89
+    }
+
+    const ASR_I2C_ADDR = 0x0B
+    const ASR_EVENT_ID = 3500
+    let lastVocabulary = 0
+    let asrInitFlag = false
+
     export function portToAnalogPin(port: AnalogPort): any {
         let pin = AnalogPin.P1
         switch (port) {
@@ -1428,5 +1498,48 @@ namespace petal {
             default:
                 return 0;
         }
+    }
+
+    /**
+     * Run code when the ASR sensor hears a vocabulary entry.
+     * @param vocabulary select vocabulary
+     * @param handler code to run
+     */
+    //% blockId="petal_onASR" block="ASR sensor hear %vocabulary"
+    //% vocabulary.fieldEditor="gridpicker" vocabulary.fieldOptions.columns=3
+    //% color=#00B1ED weight=4 group="IIC"
+    export function onASR(vocabulary: vocabularyList, handler: () => void): void {
+        control.onEvent(ASR_EVENT_ID, vocabulary, handler);
+        if (!asrInitFlag) {
+            asrInitFlag = true;
+            control.inBackground(() => {
+                while (true) {
+                    const vocabularyId = pins.i2cReadNumber(ASR_I2C_ADDR, NumberFormat.UInt8LE)
+                    if (vocabularyId != lastVocabulary) {
+                        lastVocabulary = vocabularyId
+                        control.raiseEvent(ASR_EVENT_ID, lastVocabulary);
+                    }
+                    basic.pause(50);
+                }
+            })
+        }
+    }
+
+    /**
+     * Set the ASR sensor to learning mode.
+     */
+    //% blockId="petal_setASRLearn" block="ASR sensor enter learning-model"
+    //% color=#00B1ED weight=3 group="IIC"
+    export function setASRLearn(): void {
+        pins.i2cWriteNumber(ASR_I2C_ADDR, 0x50, NumberFormat.Int8LE)
+    }
+
+    /**
+     * Clear learned entries from the ASR sensor.
+     */
+    //% blockId="petal_delASRLearn" block="ASR sensor clear learned entrys"
+    //% color=#00B1ED weight=2 group="IIC"
+    export function delASRLearn(): void {
+        pins.i2cWriteNumber(ASR_I2C_ADDR, 0x60, NumberFormat.Int8LE)
     }
 }

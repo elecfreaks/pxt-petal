@@ -1,4 +1,9 @@
 {
+  "petal.onASR": "Run code when the ASR sensor hears a vocabulary entry.",
+  "petal.onASR|param|vocabulary": "select vocabulary",
+  "petal.onASR|param|handler": "code to run",
+  "petal.setASRLearn": "Set the ASR sensor to learning mode.",
+  "petal.delASRLearn": "Clear learned entries from the ASR sensor.",
   "Petal_Display": "Functions to Petal sensor by ELECFREAKS Co.,Ltd.",
   "Petal_Display.NeoPixelMode": "Different modes for RGB or RGB+W NeoPixel strips",
   "Petal_Display.Strip.clear": "Turn off all LEDs.\nYou need to call ``show`` to make the changes visible.",
