@@ -212,6 +212,18 @@ namespace petal {
     }
 
     /**
+    * Get crash sensor state.
+    * @param port select port
+    */
+    //% blockId="petal_crash" block="crash sensor %port is pressed"
+    //% color=#EA5532 weight=98 group="Digital"
+    export function crashRead(port: DigitalPort): boolean {
+        let pin = portToDigitalPin(port)
+        pins.setPull(pin, PinPullMode.PullUp)
+        return pins.digitalReadPin(pin) == 0
+    }
+
+    /**
     * Detect magnetic field information.
     * @param port select port
     */
@@ -606,6 +618,44 @@ namespace petal {
         voltage = Math.min(100, Math.max(voltage, 0))
         waterlevel = voltage;
         return Math.round(waterlevel)
+    }
+
+    /**
+     * Get dust value (μg/m³).
+     * @param port select port
+     */
+    //% blockId="petal_dust" block="dust sensor %port value (μg/m³)"
+    //% color=#E2C438 weight=29 group="Analog"
+    export function dustRead(port: AnalogPort): number {
+        let voltage = 0
+        let dust = 0
+        let voPin = portToAnalogPin(port)
+        let ledPin = DigitalPin.P8
+        switch (port) {
+            case AnalogPort.J1:
+                ledPin = DigitalPin.P8
+                break;
+            case AnalogPort.J2:
+                ledPin = DigitalPin.P12
+                break;
+        }
+        pins.digitalWritePin(ledPin, 0)
+        control.waitMicros(160)
+        voltage = pins.analogReadPin(voPin)
+        control.waitMicros(100)
+        pins.digitalWritePin(ledPin, 1)
+        voltage = pins.map(
+            voltage,
+            0,
+            1023,
+            0,
+            3100 / 2 * 3
+        )
+        dust = (voltage - 380) * 5 / 29
+        if (dust < 0) {
+            dust = 0
+        }
+        return Math.round(dust)
     }
 
     /**
