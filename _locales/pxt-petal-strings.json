@@ -93,6 +93,7 @@
   "petal.setSeverSpeed|block": "set continuous servo on %port %severlist speed to %speed\\%",
   "petal.tiltRead|block": "tilt sensor %port Tilt lift detected",
   "petal.vibratorMotorWrite|block": "vibrator motor sensor %port %state",
+  "petal.waterPumpWrite|block": "water pump module %port %state",
   "petal.fanWrite|block": "fan motor sensor %port %state  || speed %speed \\%",
   "petal.ultrasoundSensor|block": "ultrasonic sensor %port distance %distance_unit",
   "petal.petalTempRHRead|block": "temperature and RH sensor %state value",

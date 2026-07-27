@@ -93,6 +93,7 @@
   "petal.setSeverSpeed|block": "サーボ %port %severlist %speed\\% で連続回転",
   "petal.tiltRead|block": "傾斜センサー %port が左への傾斜を検出",
   "petal.vibratorMotorWrite|block": "振動モーターモジュール %port %state",
+  "petal.waterPumpWrite|block": "ウォーターポンプモジュール %port %state",
   "petal.fanWrite|block": "ファンモジュール %port %state || 速度 %speed \\%",
   "petal.ultrasoundSensor|block": "超音波センサー検出距離 %port %distance_unit",
   "petal.petalTempRHRead|block": "温湿度センサー %state 値",

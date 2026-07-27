@@ -781,6 +781,25 @@ namespace petal {
     }
 
     /**
+     * Set water pump state.
+     * @param port select port
+     * @param state set switch state
+     */
+    //% blockId="petal_waterPump" block="water pump module %port %state"
+    //% color=#EA5532 weight=80 group="Digital"
+    export function waterPumpWrite(port: DigitalPort, state: SwitchState): void {
+        let pin = portToDigitalPin(port)
+        switch (state) {
+            case SwitchState.On:
+                pins.digitalWritePin(pin, 1)
+                break;
+            case SwitchState.Off:
+                pins.digitalWritePin(pin, 0)
+                break;
+        }
+    }
+
+    /**
      * Set fan motor state.
      * @param port select port
      * @param state set switch state
