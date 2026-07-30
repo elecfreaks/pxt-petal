@@ -1,4 +1,9 @@
 {
+  "petal.onASR": "Run code when the ASR sensor hears a vocabulary entry.",
+  "petal.onASR|param|vocabulary": "select vocabulary",
+  "petal.onASR|param|handler": "code to run",
+  "petal.setASRLearn": "Set the ASR sensor to learning mode.",
+  "petal.delASRLearn": "Clear learned entries from the ASR sensor.",
   "petal.crashRead": "Get crash sensor state.",
   "petal.crashRead|param|port": "select port",
   "petal.dustRead": "Get dust value (μg/m³).",
