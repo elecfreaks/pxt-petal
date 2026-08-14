@@ -859,18 +859,21 @@ namespace petal {
     //% speed.min=0 speed.max=100 speed.defl=50
     //% color=#EA5532 weight=82 group="Digital"
     export function fanWrite(port: DigitalPort, state: SwitchState, speed: number = 100): void {
-        let pin = portToDigitalPin(port)
-        switch (state) {
-            case SwitchState.On:
-                pins.analogSetPeriod(pin, 100)
+    let pin = portToDigitalPin(port)
+    switch (state) {
+        case SwitchState.On:
+            if (speed >= 100) {
+                pins.digitalWritePin(pin, 1)
+            } else {
+                pins.analogSetPeriod(pin, 20000)    // keep one PWM
                 pins.analogWritePin(pin, Math.map(speed, 0, 100, 0, 1023))
-                break;
-            case SwitchState.Off:
-                pins.analogWritePin(pin, 0)
-                speed = 0
-                break;
-        }
+            }
+            break;
+        case SwitchState.Off:
+            pins.digitalWritePin(pin, 0)
+            break;
     }
+}
 
     /**
      * Get ultrasonic sensor distance.
