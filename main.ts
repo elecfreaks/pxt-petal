@@ -836,6 +836,7 @@ namespace petal {
      * @param state set switch state
      */
     //% blockId="petal_waterPump" block="water pump module %port %state || power (\\%) is %power | %duration ms"
+    //% inlineInputMode=inline
     //% power.min=0 power.max=100 power.defl=100
     //% duration.min=0 duration.defl=1000
     //% expandableArgumentMode="enabled"
