@@ -835,16 +835,22 @@ namespace petal {
      * @param port select port
      * @param state set switch state
      */
-    //% blockId="petal_waterPump" block="water pump module %port %state"
+    //% blockId="petal_waterPump" block="water pump module %port %state || power (\\%) is %power | %duration ms"
+    //% power.min=0 power.max=100 power.defl=100
+    //% duration.min=0 duration.defl=1000
+    //% expandableArgumentMode="enabled"
     //% color=#EA5532 weight=80 group="Digital"
-    export function waterPumpWrite(port: DigitalPort, state: SwitchState): void {
+    export function waterPumpWrite(port: DigitalPort, state: SwitchState, power: number = 100, duration: number = 1000): void {
         let pin = portToDigitalPin(port)
         switch (state) {
             case SwitchState.On:
-                pins.digitalWritePin(pin, 1)
+                pins.analogSetPeriod(pin, 100)
+                pins.analogWritePin(pin, Math.map(power, 0, 100, 0, 1023))
+                basic.pause(duration)
+                pins.analogWritePin(pin, 0)
                 break;
             case SwitchState.Off:
-                pins.digitalWritePin(pin, 0)
+                pins.analogWritePin(pin, 0)
                 break;
         }
     }
